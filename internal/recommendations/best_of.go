@@ -41,6 +41,21 @@ func BestOf(desired *models.UniversalProps, realValues []models.UniversalProps) 
 	return processed
 }
 
+func DefaultKs(desired *models.UniversalPropsWithK) {
+	if desired.FrequencyK == 0 {
+		desired.FrequencyK = 1
+	}
+	if desired.WinRateK == 0 {
+		desired.WinRateK = 1
+	}
+	if desired.WinSizeK == 0 {
+		desired.WinSizeK = 1
+	}
+	if desired.TicketCostK == 0 {
+		desired.TicketCostK = 1
+	}
+}
+
 // d - desired
 // r - real
 func DiffPercentage(d, r float64) float64 {
