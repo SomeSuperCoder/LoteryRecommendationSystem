@@ -1,31 +1,38 @@
 package recommendations
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 
 	"github.com/SomeSuperCoder/global-chat/models"
 )
 
-func GetSuggestionsFor(ctx context.Context, former *models.UserForm, recommendations []models.Recommendation) (*models.Response, error) {
+func GetSuggestionsFor(form *models.UserForm, recommendations []models.Recommendation) (*models.Response, error) {
 	entries := make([]models.ResponseEntry, len(recommendations))
 
 	for i, recommendation := range recommendations {
 		// Define prop categories
-		goodProps := make([]models.Prop, 0)
-		badProps := make([]models.Prop, 0)
+		goodProps := make([]models.PropResult, 0)
+		badProps := make([]models.PropResult, 0)
 
 		// Go through all props and categoroze them
 		for _, prop := range recommendation.Props {
-			doesFullfil, err := DoesFullfilCondition(former, prop)
+			doesFullfil, err := DoesFullfilCondition(form, prop)
 			if err != nil {
 				return nil, err
 			}
 			if doesFullfil {
-				goodProps = append(goodProps, prop)
+				resultProp := PropToResultProp(&prop, true)
+				if resultProp.Why == "" {
+					continue
+				}
+				goodProps = append(goodProps, *resultProp)
 			} else {
-				badProps = append(badProps, prop)
+				resultProp := PropToResultProp(&prop, false)
+				if resultProp.Why == "" {
+					continue
+				}
+				badProps = append(badProps, *resultProp)
 			}
 		}
 
@@ -40,6 +47,19 @@ func GetSuggestionsFor(ctx context.Context, former *models.UserForm, recommendat
 	return &models.Response{
 		Recommendations: entries,
 	}, nil
+}
+
+func PropToResultProp(prop *models.Prop, positive bool) *models.PropResult {
+	var why string
+	if positive {
+		why = prop.PositiveWhy
+	} else {
+		why = prop.NegativeWhy
+	}
+
+	return &models.PropResult{
+		Why: why,
+	}
 }
 
 func DoesFullfilCondition(obj any, condition models.Prop) (bool, error) {
