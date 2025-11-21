@@ -10,7 +10,7 @@ import { ApiError, UploadProgressCallback } from '@lib';
 class ApiClient {
   private instance: AxiosInstance;
 
-  constructor(baseURL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000/api') {
+  constructor(baseURL: string = import.meta.env.VITE_API_URL || 'http://localhost:5173/') {
     this.instance = axios.create({
       baseURL,
       timeout: 10000,

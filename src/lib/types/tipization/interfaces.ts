@@ -24,11 +24,3 @@ export interface UploadProgressEvent {
   total?: number;
   progress: number; // 0-100
 }
-
-export interface ImportMetaEnv {
-  readonly VITE_API_URL: string;
-}
-
-export interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
