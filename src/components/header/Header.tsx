@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from "react"
-import { Flex, HStack, Link, Box } from "@chakra-ui/react"
-import { ColorModeButton } from "@components/ui/color-mode" 
-import { Image } from "@chakra-ui/react"
-import Logo from "@images/Logo.png"
+import { useState, useEffect } from 'react';
+import { Flex, HStack, Link, Box } from '@chakra-ui/react';
+import { ColorModeButton } from '@components/ui/color-mode';
+import { Image } from '@chakra-ui/react';
+import { links } from '@lib';
+import logo from '@lib/assets/images/LogoHeader.svg';
 
 const Header = () => {
-  const [isScrolled, setIsScrolled] = useState(false)
-
-  const links = [
-    { label: "Главная", href: "#" },
-    { label: "О нас", href: "#" },
-    { label: "Контакты", href: "#" },
-  ]
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <Flex
@@ -32,7 +27,7 @@ const Header = () => {
       borderBottomWidth="1px"
       borderColor="border.muted"
       bg="bg.panel"
-      backdropFilter={isScrolled ? "blur(10px)" : "none"}
+      backdropFilter={isScrolled ? 'blur(10px)' : 'none'}
       opacity={isScrolled ? 0.7 : 1}
       transition="all 0.3s"
       position="sticky"
@@ -40,16 +35,16 @@ const Header = () => {
       zIndex="sticky"
     >
       <Box>
-        <Image src={Logo} boxSize="50px"></Image>
+        <Image src={logo} boxSize="40px" cursor={'pointer'}></Image>
       </Box>
 
-      <HStack gap={8} display={{ base: "none", md: "flex" }}>
+      <HStack gap={8} display={{ base: 'none', md: 'flex' }}>
         {links.map((link) => (
-          <Link 
-            key={link.label} 
-            href={link.href} 
+          <Link
+            key={link.label}
+            href={link.href}
             fontWeight="medium"
-            _hover={{ textDecoration: "none", color: "fg.subtle" }}
+            _hover={{ textDecoration: 'none', color: 'fg.subtle' }}
           >
             {link.label}
           </Link>
@@ -60,7 +55,7 @@ const Header = () => {
         <ColorModeButton />
       </Box>
     </Flex>
-  )
-}
+  );
+};
 
 export default Header;
