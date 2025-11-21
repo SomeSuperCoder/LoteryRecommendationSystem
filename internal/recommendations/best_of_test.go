@@ -17,8 +17,6 @@ func TestBestOf(t *testing.T) {
 		},
 		WinRateK: 90,
 	}
-	// ERROR: EVERTHING IS WRONG YOU ARE MULTIPLIYING THE WRONG NUMBER
-	// NOTE: it is better to divide
 
 	DefaultKs(desiredWithKs)
 	desired := desiredWithKs.AsUniversalProps()
