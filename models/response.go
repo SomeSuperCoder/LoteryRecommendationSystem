@@ -6,6 +6,10 @@ type Response struct {
 
 type ResponseEntry struct {
 	Payload   Lotery
-	GoodProps []Prop
-	BadProps  []Prop
+	GoodProps []PropResult
+	BadProps  []PropResult
+}
+
+type PropResult struct {
+	Why string
 }
