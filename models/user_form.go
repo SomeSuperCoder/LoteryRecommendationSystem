@@ -70,15 +70,6 @@ const (
 	TypeAny      Type = "any"
 )
 
-type Motivation string
-
-const (
-	MotivationEntertainment Motivation = "entertainment"
-	MotivationBigWin        Motivation = "big_win"
-	MotivationTradition     Motivation = "tradition"
-	MotivationMechanics     Motivation = "mechanics"
-)
-
 type UserForm struct {
 	// For tests
 	Prop1 string
@@ -91,5 +82,4 @@ type UserForm struct {
 	Simplicity Simplicity
 	Format     Format
 	Type       Type
-	Motivation []Motivation
 }
