@@ -68,3 +68,12 @@ func TestSuggester(t *testing.T) {
 	}
 	log.Println(result)
 }
+
+func TestDiffPercentage(t *testing.T) {
+	if DiffPercentage(100, 10) != -0.9 {
+		t.Fail()
+	}
+	if DiffPercentage(4, 5) != 0.25 {
+		t.Fail()
+	}
+}
