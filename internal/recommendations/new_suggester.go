@@ -1,22 +1,44 @@
 package recommendations
 
 import (
+	"sort"
+
 	"github.com/SomeSuperCoder/global-chat/models"
 )
 
-func BestOf(ideal models.UniversalProps, givenList []models.UniversalProps) {
-	for _, agiven := range givenList {
+// TODO: pass in k
+func BestOf(desired *models.UniversalProps, realValues []models.UniversalProps) []models.UniversalPropsWithCalcualtedDiff {
+	processed := make([]models.UniversalPropsWithCalcualtedDiff, len(realValues))
+
+	for i, real := range realValues {
 		// Normalize all fields
-		normalized := &models.NormalizedUniversalProps{}
+		diffed := &models.DiffedUniversalProps{}
 
-		normalized.Frequency = float64(agiven.Frequency) / float64(ideal.Frequency)
-		normalized.TicketCost = float64(agiven.TicketCost) / float64(ideal.TicketCost)
-		normalized.WinRate = float64(agiven.WinRate) / float64(ideal.WinRate)
-		normalized.WinSize = float64(agiven.WinSize) / float64(ideal.WinSize)
+		diffed.Frequency = +DiffPercentage(desired.Frequency, real.Frequency)
+		diffed.TicketCost = -DiffPercentage(desired.TicketCost, real.TicketCost)
+		diffed.WinRate = +DiffPercentage(desired.WinRate, real.WinRate)
+		diffed.WinSize = +DiffPercentage(desired.WinSize, real.WinSize)
 
-		// Compare
+		// Diff sum
+		diffSum := diffed.Frequency + diffed.TicketCost + diffed.WinRate + diffed.WinSize
 
+		// Convert into a wrapped type and add into the processed array
+		processed[i] = models.UniversalPropsWithCalcualtedDiff{
+			Diff:           diffSum,
+			UniversalProps: real,
+		}
 	}
+
+	// The less the better
+	// TODO: ask if there will be a problem
+	sort.Slice(processed, func(i, j int) bool {
+		if processed[i].Diff != processed[j].Diff {
+			return processed[i].Diff > processed[j].Diff
+		}
+		return processed[i].Diff < processed[j].Diff
+	})
+
+	return processed
 }
 
 // d - desired
