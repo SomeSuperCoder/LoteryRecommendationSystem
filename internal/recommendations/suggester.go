@@ -78,6 +78,7 @@ func DoesFullfilCondition(obj any, condition models.Prop) (bool, error) {
 		return false, fmt.Errorf("field %s not found", condition.Field)
 	}
 
+	// Old implementation
 	currentFieldValue := field.Interface()
 	for _, desiredValue := range condition.AllowedValues {
 		equal := reflect.DeepEqual(currentFieldValue, desiredValue)
@@ -85,6 +86,7 @@ func DoesFullfilCondition(obj any, condition models.Prop) (bool, error) {
 			return true, nil
 		}
 	}
+	// --------------------------------------
 
 	return false, nil
 }
