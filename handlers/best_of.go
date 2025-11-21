@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/SomeSuperCoder/global-chat/internal/recommendations"
@@ -19,8 +18,6 @@ func BestOfHandler(w http.ResponseWriter, r *http.Request) {
 	if exit {
 		return
 	}
-
-	log.Println(request)
 
 	recommendations.DefaultKs(&request.Desired)
 	desired := request.Desired.AsUniversalProps()

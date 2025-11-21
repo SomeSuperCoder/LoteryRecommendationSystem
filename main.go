@@ -10,6 +10,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("POST /suggester", handlers.SuggesterHandler)
 	mux.HandleFunc("POST /best_of", handlers.BestOfHandler)
 
 	log.Println("Server listening on :8090")
