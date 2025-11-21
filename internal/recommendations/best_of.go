@@ -43,6 +43,6 @@ func BestOf(desired *models.UniversalProps, realValues []models.UniversalProps) 
 
 // d - desired
 // r - real
-func DiffPercentage(d int, r int) float64 {
+func DiffPercentage(d, r float64) float64 {
 	return float64(r-d) / float64(d)
 }

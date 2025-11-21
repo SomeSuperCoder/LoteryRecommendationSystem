@@ -1,7 +1,7 @@
 package models
 
 type UniversalProps struct {
-	WinRate, WinSize, Frequency, TicketCost int
+	WinRate, WinSize, Frequency, TicketCost float64
 }
 
 type DiffedUniversalProps struct {
