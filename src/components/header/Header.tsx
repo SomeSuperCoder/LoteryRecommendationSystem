@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Flex, HStack, Link, Box } from '@chakra-ui/react';
 import { ColorModeButton } from '@components/ui/color-mode';
 import { Image } from '@chakra-ui/react';
-import Logo from '@images/Logo.png';
+import { links } from '@lib';
+import logo from '@lib/assets/images/LogoHeader.svg';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-
-  const links = [
-    { label: 'Главная', href: '#' },
-    { label: 'О нас', href: '#' },
-    { label: 'Контакты', href: '#' },
-  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,7 +35,7 @@ const Header = () => {
       zIndex="sticky"
     >
       <Box>
-        <Image src={Logo} boxSize="50px"></Image>
+        <Image src={logo} boxSize="40px" cursor={'pointer'}></Image>
       </Box>
 
       <HStack gap={8} display={{ base: 'none', md: 'flex' }}>

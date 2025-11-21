@@ -1,10 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import React from 'react';
-import { Layout } from '@/layout/Layout';
+import { Layout } from '@/components/layout/Layout';
 
 import { HomePage } from '@pages';
-import { Assistant } from '@/components/assistant/Assistants';
-
+import { Assistant } from '@/components/assistant/Assistant';
 
 export const AppRouter: React.FC = () => {
   return (

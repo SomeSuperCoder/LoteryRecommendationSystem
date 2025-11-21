@@ -1,5 +1,5 @@
 import { useColorMode } from '@/components/ui/color-mode';
-import { endpoints } from '@/lib';
+import { endpoints } from '@lib';
 import { Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 const HomePage = () => {
