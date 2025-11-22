@@ -1,6 +1,8 @@
+// ProfileWizard.tsx
 import { useState, useEffect } from 'react';
 import { STEPS, type ProfileWizardProps, type Profile, type Field, type Answer } from '@lib';
 import { Stack, Box, HStack, Text, Progress, Heading, Button, Slider } from '@chakra-ui/react';
+import { useColorModeValue } from '@/components/ui/color-mode';
 
 export const ProfileWizard: React.FC<ProfileWizardProps> = ({ onComplete, onCancel }) => {
   const [stepIndex, setStepIndex] = useState(0);
@@ -88,20 +90,32 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({ onComplete, onCanc
 
   const winRateValue = (profile.win_rate as number | null) ?? defaultWinRate;
 
+  const textColor = useColorModeValue('#000000', '#FFFFFF');
+  const errorColor = '#FF4D4D';
+  const buttonActiveBg = '#671600'; // Standardized
+  const buttonActiveColor = '#FFFFFF'; // Standardized
+  const buttonInactiveColor = useColorModeValue('#000000', '#FFFFFF'); // Changed to use color mode for inactive text
+  const buttonBorderColor = '#671600';
+  const backButtonColor = useColorModeValue('#000000', '#FFFFFF');
+  const nextButtonBg = '#671600'; // Standardized
+  const nextButtonColor = '#FFFFFF'; // Standardized
+  const progressTrackBg = '#671600';
+  const progressRangeBg = '#FFF42A';
+
   return (
     <Stack>
       <Box>
         <HStack justify="space-between" mb={2}>
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color={textColor}>
             Анкета: шаг {stepIndex + 1} из {STEPS.length}
           </Text>
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color={textColor}>
             {Math.round(progressPercent)}%
           </Text>
         </HStack>
         <Progress.Root variant="outline" maxW="auto" value={progressPercent} colorPalette="green">
-          <Progress.Track>
-            <Progress.Range />
+          <Progress.Track bg={progressTrackBg}>
+            <Progress.Range bg={progressRangeBg} />
           </Progress.Track>
         </Progress.Root>
       </Box>
@@ -117,7 +131,8 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({ onComplete, onCanc
                 <Button
                   key={String(opt.value)}
                   variant={active ? 'solid' : 'outline'}
-                  colorScheme="blue"
+                  bg={active ? buttonActiveBg : undefined}
+                  color={active ? buttonActiveColor : buttonInactiveColor}
                   justifyContent="flex-start"
                   w="100%"
                   borderRadius="lg"
@@ -129,6 +144,7 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({ onComplete, onCanc
                   px={4}
                   onClick={() => handleSelect(currentStep.field, opt.value)}
                   disabled={isSubmitting}
+                  borderColor={buttonBorderColor}
                 >
                   <Box as="span" w="100%" textAlign="left">
                     {opt.label}
@@ -158,13 +174,13 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({ onComplete, onCanc
                 <Slider.ValueText />
               </HStack>
               <Slider.Control>
-                <Slider.Track>
-                  <Slider.Range />
+                <Slider.Track bg={progressTrackBg}>
+                  <Slider.Range bg={progressRangeBg} />
                 </Slider.Track>
                 <Slider.Thumbs />
               </Slider.Control>
             </Slider.Root>
-            <Text fontSize="xs" color="gray.500" mt={2}>
+            <Text fontSize="xs" color={textColor} mt={2}>
               Сейчас выбрано примерно {winRateValue}% раз, когда ты ожидаешь выигрыш.
             </Text>
           </Box>
@@ -186,13 +202,13 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({ onComplete, onCanc
               }}
             >
               <Slider.Control>
-                <Slider.Track>
-                  <Slider.Range />
+                <Slider.Track bg={progressTrackBg}>
+                  <Slider.Range bg={progressRangeBg} />
                 </Slider.Track>
                 <Slider.Thumbs />
               </Slider.Control>
             </Slider.Root>
-            <Text fontSize="xs" color="gray.500" mt={2}>
+            <Text fontSize="xs" color={textColor} mt={2}>
               Средний желаемый размер выигрыша:{' '}
               {profile.win_size ? `${Math.round(profile.win_size as number)} ₽` : 'пока не задан'}.
             </Text>
@@ -200,17 +216,17 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({ onComplete, onCanc
         )}
 
         {error && (
-          <Text fontSize="xs" color="red.400">
+          <Text fontSize="xs" color={errorColor}>
             {error}
           </Text>
         )}
       </Stack>
 
       <HStack justify="space-between" pt={1}>
-        <Button variant="ghost" size="sm" onClick={handleBack} disabled={isSubmitting}>
+        <Button variant="ghost" size="sm" onClick={handleBack} disabled={isSubmitting} color={backButtonColor}>
           Назад
         </Button>
-        <Button colorScheme="blue" size="sm" onClick={handleNext} disabled={isSubmitting}>
+        <Button bg={nextButtonBg} color={nextButtonColor} size="sm" onClick={handleNext} disabled={isSubmitting}>
           {stepIndex === STEPS.length - 1 ? 'Показать рекомендации' : 'Далее'}
         </Button>
       </HStack>

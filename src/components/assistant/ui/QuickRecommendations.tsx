@@ -1,4 +1,4 @@
-// src/components/assistant/ui/QuickRecommendations.tsx
+// QuickRecommendations.tsx
 import React, { useMemo, useState, useEffect } from 'react';
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { getInitialLotteries } from '@/lib';
@@ -27,9 +27,10 @@ export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const initialLotteries = useMemo(() => getInitialLotteries(), []);
-  const cardBg = useColorModeValue('white', 'gray.900');
-  const cardBorder = useColorModeValue('gray.200', 'gray.700');
-
+  const cardBg = useColorModeValue('#FFFFFF', '#000000');
+  const cardBorder = useColorModeValue('#808080', '#000000');
+  const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)'); // White shadow for dark theme
+  
   useEffect(() => {
     // симулируем загрузку данных от ассистента
     const timer = setTimeout(() => {
@@ -45,14 +46,24 @@ export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
     }
   };
 
+  const textColor = useColorModeValue('#000000', '#FFFFFF');
+  const spinnerColor = '#FFA500';
+  const badgePriceBg = '#FFA500';
+  const badgePriceColor = '#000000';
+  const badgeRiskColor = '#000000';
+  const badgeTypeBorder = '#671600';
+  const badgeTypeColor = useColorModeValue('#000000', '#FFFFFF');
+  const buttonBg = '#671600';
+  const buttonColor = '#FFFFFF';
+
   if (isLoading) {
     return (
       <Stack>
         <Heading size="sm">Смотрю, с чего лучше начать…</Heading>
         <Box py={2}>
           <Center flexDirection="column">
-            <Spinner size="md" color="blue.400" mb={3} />
-            <Text fontSize="sm" color="gray.500" textAlign="center">
+            <Spinner size="md" color={spinnerColor} mb={3} />
+            <Text fontSize="sm" color={textColor} textAlign="center">
               Собираю несколько стартовых вариантов лотерей.
             </Text>
           </Center>
@@ -73,23 +84,24 @@ export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
             borderRadius="xl"
             p={3}
             bg={cardBg}
-            boxShadow="sm"
+            boxShadow={cardShadow} // Applied here
           >
             <Stack>
               <Heading size="xs">{lottery.name}</Heading>
-              <Text fontSize="xs" color="gray.500">
+              <Text fontSize="xs" color={textColor}>
                 {lottery.description}
               </Text>
               <HStack mt={1} wrap="wrap">
-                <Badge colorScheme="blue">{lottery.minPrice} ₽</Badge>
+                <Badge bg={badgePriceBg} color={badgePriceColor}>{lottery.minPrice} ₽</Badge>
                 <Badge
-                  colorScheme={
-                    lottery.risk === 'low' ? 'green' : lottery.risk === 'medium' ? 'yellow' : 'red'
+                  bg={
+                    lottery.risk === 'low' ? '#FFF42A' : lottery.risk === 'medium' ? '#FFA500' : '#FF4D4D'
                   }
+                  color={badgeRiskColor}
                 >
                   Риск: {lottery.risk}
                 </Badge>
-                <Badge variant="outline" fontSize="0.65rem">
+                <Badge variant="outline" fontSize="0.65rem" borderColor={badgeTypeBorder} color={badgeTypeColor}>
                   {lottery.drawType === 'draw' ? 'Тиражная' : 'Моментальная'}
                 </Badge>
               </HStack>
@@ -99,10 +111,10 @@ export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
       </SimpleGrid>
 
       <HStack justify="space-between" pt={2}>
-        <Text fontSize="sm" color="gray.500">
+        <Text fontSize="sm" color={textColor}>
           Если эти варианты не заходят — давай настроим подбор под тебя.
         </Text>
-        <Button colorScheme="blue" size="sm" onClick={handleStartQuestionnaire}>
+        <Button bg={buttonBg} color={buttonColor} size="sm" onClick={handleStartQuestionnaire}>
           Настроить под себя
         </Button>
       </HStack>

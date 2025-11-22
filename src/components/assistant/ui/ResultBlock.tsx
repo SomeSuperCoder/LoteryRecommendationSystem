@@ -1,4 +1,4 @@
-// src/components/assistant/ui/ResultBlock.tsx
+// ResultBlock.tsx
 import React from 'react';
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { Stack, Heading, SimpleGrid, Box, HStack, Badge, Text, Button } from '@chakra-ui/react';
@@ -9,10 +9,19 @@ export const ResultsBlock: React.FC<ResultsBlockProps> = ({
   bestLotteries,
   onGoRefine,
 }) => {
-  if (!profile) return null;
+  const cardBg = useColorModeValue('#FFFFFF', '#000000');
+  const cardBorder = useColorModeValue('#808080', '#000000');
+  const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)'); // White shadow for dark theme
+  const textColor = useColorModeValue('#000000', '#FFFFFF');
+  const outlineColor = useColorModeValue('#000000', '#FFFFFF');
+  const badgePriceBg = '#FFA500';
+  const badgePriceColor = '#000000';
+  const badgeRiskColor = '#000000';
+  const badgeTypeBorder = '#671600';
+  const buttonBg = '#671600';
+  const buttonColor = '#FFFFFF';
 
-  const cardBg = useColorModeValue('white', 'gray.900');
-  const cardBorder = useColorModeValue('gray.200', 'gray.700');
+  if (!profile) return null;
 
   return (
     <Stack>
@@ -27,35 +36,36 @@ export const ResultsBlock: React.FC<ResultsBlockProps> = ({
             borderRadius="xl"
             p={4}
             bg={cardBg}
-            boxShadow="sm"
+            boxShadow={cardShadow} // Applied here
           >
             <Stack>
               <Heading size="xs">{lottery.name}</Heading>
               <HStack>
-                <Badge colorScheme="blue">{lottery.minPrice} ₽</Badge>
+                <Badge bg={badgePriceBg} color={badgePriceColor}>{lottery.minPrice} ₽</Badge>
                 <Badge
-                  colorScheme={
-                    lottery.risk === 'low' ? 'green' : lottery.risk === 'medium' ? 'yellow' : 'red'
+                  bg={
+                    lottery.risk === 'low' ? '#FFF42A' : lottery.risk === 'medium' ? '#FFA500' : '#FF4D4D'
                   }
+                  color={badgeRiskColor}
                 >
                   Риск: {lottery.risk}
                 </Badge>
-                <Badge variant="outline" fontSize="0.65rem">
+                <Badge variant="outline" fontSize="0.65rem" borderColor={badgeTypeBorder} color={outlineColor}>
                   {lottery.drawType === 'draw' ? 'Тиражная' : 'Моментальная'}
                 </Badge>
               </HStack>
-              <Text fontSize="xs" color="gray.500">
+              <Text fontSize="xs" color={textColor}>
                 {lottery.description}
               </Text>
-              <Text fontSize="xs">{explainMatch(profile, lottery)}</Text>
+              <Text fontSize="xs" color={textColor}>{explainMatch(profile, lottery)}</Text>
 
               <Box pt={1}>
-                <Text fontSize="0.65rem" color="gray.500" mb={1}>
+                <Text fontSize="0.65rem" color={textColor} mb={1}>
                   Особенности:
                 </Text>
                 <Stack fontSize="0.7rem">
                   {lottery.features.map((f) => (
-                    <Text key={f}>• {f}</Text>
+                    <Text key={f} color={textColor}>• {f}</Text>
                   ))}
                 </Stack>
               </Box>
@@ -65,10 +75,10 @@ export const ResultsBlock: React.FC<ResultsBlockProps> = ({
       </SimpleGrid>
 
       <HStack justify="space-between" pt={1}>
-        <Text fontSize="sm" color="gray.500">
+        <Text fontSize="sm" color={textColor}>
           Теперь ещё несколько уточняющих вопросов — и выберем один лучший вариант.
         </Text>
-        <Button colorScheme="purple" size="sm" onClick={onGoRefine}>
+        <Button bg={buttonBg} color={buttonColor} size="sm" onClick={onGoRefine}>
           Уточнить и выбрать один
         </Button>
       </HStack>

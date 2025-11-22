@@ -1,10 +1,24 @@
-import { Flex, HStack, Link, Box } from '@chakra-ui/react';
-import { ColorModeButton } from '@components/ui/color-mode';
+import { Flex, HStack, Link, Box, Text } from '@chakra-ui/react';
+import { ColorModeButton, useColorMode, useColorModeValue } from '@components/ui/color-mode';
 import { Image } from '@chakra-ui/react';
 import { links } from '@lib';
-import logo from '@lib/assets/images/LogoHeader.svg';
+import logoLight from '@lib/assets/images/LogoLight.svg'; 
+import logoDark from '@lib/assets/images/LogoDark.svg'; 
 
 const Header = () => {
+  const { colorMode } = useColorMode();
+  const logoSrc = colorMode === 'light' ? logoLight : logoDark;
+  
+  const titleColor = useColorModeValue('gray.800', '#FFF42A');
+    
+  const textStyles = {
+    fontFamily: 'Unbounded, sans-serif',
+    fontWeight: '600',
+    fontSize: '30.25px',
+    lineHeight: '50.32px',
+    ml: 2,
+  };
+
   return (
     <Flex
       as="header"
@@ -18,15 +32,41 @@ const Header = () => {
       bg="transparent"
       backdropFilter="blur(10px)"
       transition="all 0.3s"
-      position="fixed" // Ключевое изменение: Фиксируем хедер на экране
+      position="fixed"
       top={0}
-      zIndex={100} // Гарантируем, что хедер поверх всего
+      zIndex={100}
     >
-      <Box>
-        <Link key="main" href="/">
-            <Image src={logo} boxSize="40px" cursor={'pointer'}></Image>
-        </Link>
-      </Box>
+      <HStack>
+        <Box>
+          <Link 
+              key="main" 
+              href="/"
+              border="none"
+              borderWidth={0}
+              outline="none"
+              boxShadow="none"
+              _focus={{ 
+                  boxShadow: 'none',
+                  outline: 'none', 
+                  border: 'none' 
+              }}
+          >
+              <Image 
+                  src={logoSrc} 
+                  boxSize="40px" 
+                  cursor={'pointer'}
+                  opacity={0.85}
+                  border="none" 
+                  borderWidth={0}
+                  outline="none"
+                  boxShadow="none"
+              ></Image>
+          </Link>
+        </Box>
+        <Text color={titleColor} {...textStyles}>
+          Триумф
+        </Text>
+      </HStack>
 
       <HStack gap={8} display={{ base: 'none', md: 'flex' }}>
         {links.map((link) => {

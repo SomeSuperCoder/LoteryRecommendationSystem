@@ -1,6 +1,8 @@
+// RefineWizard.tsx
 import { useState } from 'react';
 import { chooseFinalLottery } from '@lib';
 import { Stack, Box, HStack, Text, Progress, Button, Heading } from '@chakra-ui/react';
+import { useColorModeValue } from '@/components/ui/color-mode';
 import { type RefineWizardProps, type MicroAnswers, MICRO_STEPS, type MicroField } from '@lib';
 
 export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, onComplete }) => {
@@ -51,26 +53,38 @@ export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, 
   const progressPercent =
     PROGRESS_BY_STEP[stepIndex] ?? PROGRESS_BY_STEP[PROGRESS_BY_STEP.length - 1];
 
+  const textColor = useColorModeValue('#000000', '#FFFFFF');
+  const errorColor = '#FF4D4D';
+  const buttonActiveBg = '#671600'; // Standardized
+  const buttonActiveColor = '#FFFFFF'; // Standardized
+  const buttonInactiveColor = useColorModeValue('#000000', '#FFFFFF'); // Changed to use color mode for inactive text
+  const buttonBorderColor = '#671600';
+  const backButtonColor = useColorModeValue('#000000', '#FFFFFF');
+  const nextButtonBg = '#671600'; // Standardized
+  const nextButtonColor = '#FFFFFF'; // Standardized
+  const progressTrackBg = '#671600';
+  const progressRangeBg = '#FFF42A';
+
   return (
     <Stack>
       <Box>
         <HStack justify="space-between" mb={2}>
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color={textColor}>
             Дополнительные вопросы {stepIndex + 1} из {MICRO_STEPS.length}
           </Text>
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color={textColor}>
             {Math.round(progressPercent)}%
           </Text>
         </HStack>
         <Progress.Root variant="outline" maxW="auto" value={progressPercent} colorPalette="green">
-          <Progress.Track>
-            <Progress.Range />
+          <Progress.Track bg={progressTrackBg}>
+            <Progress.Range bg={progressRangeBg} />
           </Progress.Track>
         </Progress.Root>
       </Box>
 
       <Stack>
-        <Heading size="sm">{currentStep.title}</Heading>
+        <Heading size="sm"> {currentStep.title}</Heading>
         <Stack>
           {currentStep.options.map((opt) => {
             const active = answers[currentStep.field] === opt.value;
@@ -78,7 +92,8 @@ export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, 
               <Button
                 key={String(opt.value)}
                 variant={active ? 'solid' : 'outline'}
-                colorScheme="purple"
+                bg={active ? buttonActiveBg : undefined}
+                color={active ? buttonActiveColor : buttonInactiveColor}
                 justifyContent="flex-start"
                 w="100%"
                 borderRadius="lg"
@@ -90,6 +105,7 @@ export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, 
                 px={4}
                 onClick={() => handleSelect(currentStep.field, opt.value)}
                 disabled={isSubmitting}
+                borderColor={buttonBorderColor}
               >
                 {opt.label}
               </Button>
@@ -97,17 +113,17 @@ export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, 
           })}
         </Stack>
         {error && (
-          <Text fontSize="xs" color="red.500">
+          <Text fontSize="xs" color={errorColor}>
             {error}
           </Text>
         )}
       </Stack>
 
       <HStack justify="space-between" pt={2}>
-        <Button variant="ghost" size="sm" onClick={handleBack} disabled={isSubmitting}>
+        <Button variant="ghost" size="sm" onClick={handleBack} disabled={isSubmitting} color={backButtonColor}>
           Назад
         </Button>
-        <Button colorScheme="purple" size="sm" onClick={handleNext} disabled={isSubmitting}>
+        <Button bg={nextButtonBg} color={nextButtonColor} size="sm" onClick={handleNext} disabled={isSubmitting}>
           {stepIndex === MICRO_STEPS.length - 1 ? 'Выбрать лучший вариант' : 'Далее'}
         </Button>
       </HStack>

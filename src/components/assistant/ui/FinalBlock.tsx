@@ -1,3 +1,4 @@
+// FinalBlock.tsx
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { Stack, Heading, Box, HStack, Badge, Text, Button } from '@chakra-ui/react';
 import { explainMatch, handleRestart, FinalBlockProps } from '@lib';
@@ -15,10 +16,19 @@ export const FinalBlock: React.FC<FinalBlockProps> = ({
   setHasFinal,
   setIsLoadingFinal,
 }) => {
-  if (!finalLottery || !profile) return null;
+  const cardBg = useColorModeValue('#FFFFFF', '#000000');
+  const cardBorder = useColorModeValue('#808080', '#000000');
+  const cardShadow = useColorModeValue('lg', '0px 0px 10px rgba(255, 255, 255, 0.2)'); // White shadow for dark theme
+  const textColor = useColorModeValue('#000000', '#FFFFFF');
+  const outlineColor = useColorModeValue('#000000', '#FFFFFF');
+  const badgePriceBg = '#FFA500';
+  const badgePriceColor = '#000000';
+  const badgeRiskColor = '#000000';
+  const badgeTypeBorder = '#671600';
+  const buttonBg = '#671600';
+  const buttonColor = '#FFFFFF';
 
-  const cardBg = useColorModeValue('white', 'gray.900');
-  const cardBorder = useColorModeValue('gray.200', 'gray.700');
+  if (!finalLottery || !profile) return null;
 
   return (
     <Stack>
@@ -30,51 +40,52 @@ export const FinalBlock: React.FC<FinalBlockProps> = ({
         borderRadius="2xl"
         p={5}
         bg={cardBg}
-        boxShadow="lg"
+        boxShadow={cardShadow} // Applied here
       >
         <Heading size="md" mb={2}>
           {finalLottery.name}
         </Heading>
         <HStack mb={3}>
-          <Badge colorScheme="blue">{finalLottery.minPrice} ₽</Badge>
+          <Badge bg={badgePriceBg} color={badgePriceColor}>{finalLottery.minPrice} ₽</Badge>
           <Badge
-            colorScheme={
+            bg={
               finalLottery.risk === 'low'
-                ? 'green'
+                ? '#FFF42A'
                 : finalLottery.risk === 'medium'
-                ? 'yellow'
-                : 'red'
+                ? '#FFA500'
+                : '#FF4D4D'
             }
+            color={badgeRiskColor}
           >
             Риск: {finalLottery.risk}
           </Badge>
-          <Badge variant="outline">
+          <Badge variant="outline" borderColor={badgeTypeBorder} color={outlineColor}>
             {finalLottery.drawType === 'draw' ? 'Тиражная' : 'Моментальная'}
           </Badge>
-          <Badge variant="outline">{finalLottery.format === 'online' ? 'Онлайн' : 'Оффлайн'}</Badge>
+          <Badge variant="outline" borderColor={badgeTypeBorder} color={outlineColor}>{finalLottery.format === 'online' ? 'Онлайн' : 'Оффлайн'}</Badge>
         </HStack>
 
-        <Text mb={3}>{finalLottery.description}</Text>
+        <Text mb={3} color={textColor}>{finalLottery.description}</Text>
 
-        <Text fontSize="sm" fontWeight="semibold" mb={1}>
+        <Text fontSize="sm" fontWeight="semibold" mb={1} color={textColor}>
           Почему это подходит именно тебе:
         </Text>
-        <Text fontSize="sm" mb={3}>
+        <Text fontSize="sm" mb={3} color={textColor}>
           {explainMatch(profile, finalLottery)}
         </Text>
 
-        <Text fontSize="sm" color="gray.500" mb={2}>
+        <Text fontSize="sm" color={textColor} mb={2}>
           Особенности:
         </Text>
         <Stack fontSize="sm">
           {finalLottery.features.map((f) => (
-            <Text key={f}>• {f}</Text>
+            <Text key={f} color={textColor}>• {f}</Text>
           ))}
         </Stack>
       </Box>
 
       <Button
-        variant="outline"
+        variant="solid"
         size="sm"
         alignSelf="flex-start"
         onClick={() =>
@@ -90,6 +101,8 @@ export const FinalBlock: React.FC<FinalBlockProps> = ({
             setIsLoadingFinal
           )
         }
+        bg={buttonBg}
+        color={buttonColor}
       >
         Начать подбор заново
       </Button>

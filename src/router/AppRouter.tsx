@@ -12,7 +12,7 @@ export const AppRouter: React.FC = () => {
           path="/"
           element={
             <Layout>
-              <HomePage />
+              <AssistantPage />
             </Layout>
           }
         />

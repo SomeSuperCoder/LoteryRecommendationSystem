@@ -8,10 +8,11 @@ const AssistantPage: React.FC = () => {
   const textColor = useColorModeValue('black', 'white');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const sidebarGradient = useColorModeValue(
-    "linear(to-br, purple.600, blue.600, teal.400)",
-    "linear(to-br, gray.800, gray.700, gray.600)" 
-  );
+  // Градиенты убраны для прозрачности
+  // const sidebarGradient = useColorModeValue(
+  //   "linear(to-br, purple.600, blue.600, teal.400)",
+  //   "linear(to-br, gray.800, gray.700, gray.600)" 
+  // );
 
   useEffect(() => {
     if (!chatContainerRef.current) return;
@@ -35,7 +36,7 @@ const AssistantPage: React.FC = () => {
   return (
     <Flex
       w="100%"     
-      bg="transparent"
+      bg="transparent" // Уже был прозрачным
       p={{ base: 0, lg: 6 }}
       flex="1"
       align="flex-start"
@@ -43,7 +44,7 @@ const AssistantPage: React.FC = () => {
       <Flex
         w="100%"
         minH={{ base: 'auto', lg: '80vh' }}
-        bg="transparent" 
+        bg="transparent" // Уже был прозрачным
         borderRadius={{ base: '0', lg: '3xl' }}
         overflow="hidden"
         flexDirection={{ base: 'column', lg: 'row' }}
@@ -51,22 +52,14 @@ const AssistantPage: React.FC = () => {
         <Box
           w={{ base: '0', lg: '20%', xl: '18%' }}
           display={{ base: 'none', lg: 'flex' }}
-          bgGradient={sidebarGradient}
+          bg="transparent" // Сделали фон прозрачным
           position="relative"
           flexDirection="column"
           color={textColor}
           overflow="hidden"
           minH="full"
         >
-          <Box
-            position="absolute"
-            top="0"
-            left="0"
-            w="full"
-            h="full"
-            opacity={0.1}
-            bgImage="url('https://www.transparenttextures.com/patterns/cubes.png')" 
-          />
+          {/* Box с фоновым паттерном (opacity 0.1) удален для полной прозрачности */}
 
           <Box 
             w="full" 
@@ -100,7 +93,7 @@ const AssistantPage: React.FC = () => {
 
         <Box 
           flex="1" 
-          bg="transparent" 
+          bg="transparent" // Убедились, что фон прозрачен
           position="relative"
           ref={chatContainerRef}
         >
