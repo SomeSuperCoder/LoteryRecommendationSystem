@@ -8,15 +8,6 @@ type UniversalPropsWithK struct {
 	TicketCostK float64 `json:"ticket_cost_k"`
 }
 
-func (u *UniversalPropsWithK) AsUniversalProps() *UniversalProps {
-	return &UniversalProps{
-		WinRate:    u.WinRate,
-		WinSize:    u.WinSize,
-		Frequency:  u.Frequency,
-		TicketCost: u.TicketCost,
-	}
-}
-
 type UniversalProps struct {
 	WinRate    float64 `json:"win_rate"`
 	WinSize    float64 `json:"win_size"`
