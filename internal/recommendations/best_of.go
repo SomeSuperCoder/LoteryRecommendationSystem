@@ -6,7 +6,6 @@ import (
 	"github.com/SomeSuperCoder/global-chat/models"
 )
 
-// TODO: pass in k
 func BestOf(desired *models.UniversalProps, realValues []models.UniversalProps) []models.UniversalPropsWithCalcualtedDiff {
 	processed := make([]models.UniversalPropsWithCalcualtedDiff, len(realValues))
 
@@ -59,5 +58,5 @@ func DefaultKs(desired *models.UniversalPropsWithK) {
 // d - desired
 // r - real
 func DiffPercentage(d, r float64) float64 {
-	return float64(r-d) / float64(d)
+	return (r - d) / d
 }
