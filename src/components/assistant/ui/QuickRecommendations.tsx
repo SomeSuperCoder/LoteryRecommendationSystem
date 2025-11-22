@@ -1,5 +1,5 @@
 // src/components/assistant/ui/QuickRecommendations.tsx
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useColorModeValue } from '@/components/ui/color-mode';
 import {
   Stack,
@@ -23,141 +23,172 @@ interface QuickRecommendationsProps {
   onRetry: () => void;
 }
 
-export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
-  hasStartedQuestionnaire,
-  setHasStartedQuestionnaire,
-  lotteries,
-  isLoading,
-  error,
-  onRetry,
-}) => {
-  const cardBg = useColorModeValue('white', 'gray.900');
+export const QuickRecommendations: React.FC<QuickRecommendationsProps> = React.memo(
+  ({
+    hasStartedQuestionnaire,
+    setHasStartedQuestionnaire,
+    lotteries,
+    isLoading,
+    error,
+    onRetry,
+  }) => {
+    // UI-стили из нового коммита
+    const cardBg = useColorModeValue(
+      'linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)',
+      '#000000'
+    );
+    const cardBorder = useColorModeValue('0', '#000000');
+    const cardBorderWidth = useColorModeValue('0px', '1px');
+    const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)');
 
-  const handleStartQuestionnaire = () => {
-    console.log('[QuickRecommendations] Клик по "Настроить под себя"');
-    if (!hasStartedQuestionnaire) {
-      setHasStartedQuestionnaire(true);
-    }
-  };
+    const textColor = useColorModeValue('#000000', '#FFFFFF');
+    const badgePriceBg = '#FFA500';
+    const badgePriceColor = '#000000';
+    const badgeRiskColor = '#000000';
+    const badgeTypeBorder = '#671600';
+    const badgeTypeColor = useColorModeValue('#000000', '#FFFFFF');
+    const buttonBg = '#671600';
+    const buttonColor = '#FFFFFF';
 
-  const hasLotteries = lotteries && lotteries.length > 0;
+    const hasLotteries = lotteries && lotteries.length > 0;
 
-  return (
-    <Stack>
-      <Heading size="sm">Я нашёл несколько вариантов, с которых можно начать 👇</Heading>
+    const handleStartQuestionnaire = useCallback(() => {
+      if (!hasStartedQuestionnaire) {
+        console.log('[QuickRecommendations] Клик по "Настроить под себя"');
+        setHasStartedQuestionnaire(true);
+      }
+    }, [hasStartedQuestionnaire, setHasStartedQuestionnaire]);
 
-      <Box>
-        {isLoading && (
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap="10px">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <Box
-                key={idx}
-                borderWidth="1px"
-                borderColor="orange.300"
-                borderRadius="xl"
-                p={3}
-                bg={cardBg}
-                boxShadow="sm"
-              >
-                <Stack>
-                  <Skeleton height="14px" width="70%" />
-                  <Skeleton height="10px" width="90%" />
-                  <Skeleton height="10px" width="80%" />
-                  <HStack mt={1}>
-                    <Skeleton height="18px" width="50px" />
-                    <Skeleton height="18px" width="60px" />
-                    <Skeleton height="18px" width="70px" />
-                  </HStack>
-                </Stack>
-              </Box>
-            ))}
-          </SimpleGrid>
-        )}
+    return (
+      <Stack>
+        <Heading size="md">Я нашёл несколько вариантов, с которых можно начать 👇</Heading>
 
-        {!isLoading && error && (
-          <Stack>
-            <Text fontSize="sm" color="red.400">
-              {error}
+        <Box>
+          {isLoading && (
+            <SimpleGrid columns={{ base: 1, md: 3 }} gap="10px">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <Box
+                  key={idx}
+                  borderWidth={cardBorderWidth}
+                  borderColor={cardBorder}
+                  borderRadius="xl"
+                  p={3}
+                  bg={cardBg}
+                  boxShadow={cardShadow}
+                >
+                  <Stack>
+                    <Skeleton height="14px" width="70%" />
+                    <Skeleton height="10px" width="90%" />
+                    <Skeleton height="10px" width="80%" />
+                    <HStack mt={1}>
+                      <Skeleton height="18px" width="50px" />
+                      <Skeleton height="18px" width="60px" />
+                      <Skeleton height="18px" width="70px" />
+                    </HStack>
+                  </Stack>
+                </Box>
+              ))}
+            </SimpleGrid>
+          )}
+
+          {!isLoading && error && (
+            <Stack>
+              <Text fontSize="15.12px" color="#FF4D4D">
+                {error}
+              </Text>
+              <Text fontSize="15.12px" color={useColorModeValue('gray.600', 'gray.300')}>
+                Можно попробовать ещё раз обновить список или перейти к умному подбору.
+              </Text>
+            </Stack>
+          )}
+
+          {!isLoading && !error && !hasLotteries && (
+            <Text fontSize="15.12px" color={useColorModeValue('gray.600', 'gray.300')}>
+              Пока нет быстрых вариантов — давай сразу перейдём к умному подбору или обновим список.
             </Text>
-            <Text fontSize="sm" color="gray.500">
-              Можно попробовать ещё раз обновить список или перейти к умному подбору.
-            </Text>
-          </Stack>
-        )}
+          )}
 
-        {!isLoading && !error && !hasLotteries && (
-          <Text fontSize="sm" color="gray.500">
-            Пока нет быстрых вариантов — давай сразу перейдём к умному подбору или обновим список.
+          {!isLoading && !error && hasLotteries && (
+            <SimpleGrid columns={{ base: 1, md: 3 }} gap="10px">
+              {lotteries.map((lottery) => (
+                <Box
+                  key={lottery.id}
+                  borderWidth={cardBorderWidth}
+                  borderColor={cardBorder}
+                  borderRadius="xl"
+                  p={3}
+                  bg={cardBg}
+                  boxShadow={cardShadow}
+                >
+                  <Stack>
+                    <Heading size="md">{lottery.name}</Heading>
+
+                    <HStack mt={1} wrap="wrap">
+                      <Badge bg={badgePriceBg} color={badgePriceColor}>
+                        {lottery.minPrice} ₽
+                      </Badge>
+                      <Badge
+                        bg={
+                          lottery.risk === 'low'
+                            ? '#FFF42A'
+                            : lottery.risk === 'medium'
+                            ? '#FFA500'
+                            : '#FF4D4D'
+                        }
+                        color={badgeRiskColor}
+                      >
+                        Риск: {lottery.risk}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        fontSize="0.7rem"
+                        borderColor={badgeTypeBorder}
+                        color={badgeTypeColor}
+                      >
+                        {lottery.drawType === 'draw' ? 'Тиражная' : 'Моментальная'}
+                      </Badge>
+                    </HStack>
+
+                    <Text fontSize="15.12px" color={textColor}>
+                      {lottery.description}
+                    </Text>
+                  </Stack>
+                </Box>
+              ))}
+            </SimpleGrid>
+          )}
+        </Box>
+
+        <HStack justify="space-between" pt={2}>
+          <Text fontSize="15.12px" color={textColor}>
+            Если эти варианты не заходят — давай настроим подбор под тебя.
           </Text>
-        )}
-
-        {!isLoading && !error && hasLotteries && (
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap="10px">
-            {lotteries.map((lottery) => (
-              <Box
-                key={lottery.id}
-                borderWidth="1px"
-                borderColor="orange.300"
-                borderRadius="xl"
-                p={3}
-                bg={cardBg}
-                boxShadow="sm"
-              >
-                <Stack>
-                  <Heading size="xs">{lottery.name}</Heading>
-                  <Text fontSize="xs" color="gray.500">
-                    {lottery.description}
-                  </Text>
-                  <HStack mt={1} wrap="wrap">
-                    <Badge colorScheme="orange">{lottery.minPrice} ₽</Badge>
-                    <Badge
-                      colorScheme={
-                        lottery.risk === 'low'
-                          ? 'green'
-                          : lottery.risk === 'medium'
-                          ? 'yellow'
-                          : 'red'
-                      }
-                    >
-                      Риск: {lottery.risk}
-                    </Badge>
-                    <Badge variant="outline" fontSize="0.65rem">
-                      {lottery.drawType === 'draw' ? 'Тиражная' : 'Моментальная'}
-                    </Badge>
-                  </HStack>
-                </Stack>
-              </Box>
-            ))}
-          </SimpleGrid>
-        )}
-      </Box>
-
-      <HStack justify="space-between" pt={2}>
-        <Text fontSize="sm" color="gray.500">
-          Если эти варианты не заходят — давай настроим подбор под тебя.
-        </Text>
-        <HStack>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              console.log('[QuickRecommendations] Клик по "Обновить"');
-              onRetry();
-            }}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Обновляется…' : 'Обновить'}
-          </Button>
-          <Button
-            colorScheme="orange"
-            size="sm"
-            onClick={handleStartQuestionnaire}
-            disabled={isLoading}
-          >
-            Настроить под себя
-          </Button>
+          <HStack>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                console.log('[QuickRecommendations] Клик по "Обновить"');
+                onRetry();
+              }}
+              disabled={isLoading}
+              borderRadius="full"
+            >
+              {isLoading ? 'Обновляется…' : 'Обновить'}
+            </Button>
+            <Button
+              bg={buttonBg}
+              color={buttonColor}
+              size="sm"
+              onClick={handleStartQuestionnaire}
+              disabled={isLoading}
+              borderRadius="full"
+            >
+              Настроить под себя
+            </Button>
+          </HStack>
         </HStack>
-      </HStack>
-    </Stack>
-  );
-};
+      </Stack>
+    );
+  }
+);

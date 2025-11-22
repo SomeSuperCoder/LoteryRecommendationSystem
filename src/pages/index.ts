@@ -1,1 +1,2 @@
-export * from "./home/index";
+export * from './assistant';
+export * from './not-found';

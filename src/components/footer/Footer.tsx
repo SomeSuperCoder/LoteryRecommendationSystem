@@ -7,7 +7,7 @@ const Footer = () => {
       w="full"
       py={4}
       px={8}
-      bg="bg.panel"
+      bg="transparent"
       borderTopWidth="1px"
       borderColor="border.muted"
     >

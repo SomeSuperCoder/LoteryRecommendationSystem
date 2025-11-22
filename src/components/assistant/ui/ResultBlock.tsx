@@ -4,94 +4,122 @@ import { useColorModeValue } from '@/components/ui/color-mode';
 import { Stack, Heading, SimpleGrid, Box, HStack, Badge, Text, Button } from '@chakra-ui/react';
 import type { ResultsBlockProps } from '@/lib';
 
-export const ResultsBlock: React.FC<ResultsBlockProps> = ({
-  profile,
-  bestLotteries,
-  onGoRefine,
-}) => {
-  if (!profile) {
-    console.warn('[ResultsBlock] profile отсутствует, блок не будет отображён');
-    return null;
-  }
+export const ResultsBlock: React.FC<ResultsBlockProps> = React.memo(
+  ({ profile, bestLotteries, onGoRefine }) => {
+    if (!profile) {
+      console.warn('[ResultsBlock] profile отсутствует, блок не будет отображён');
+      return null;
+    }
 
-  const cardBg = useColorModeValue('white', 'gray.900');
-  const cardBorder = useColorModeValue('gray.200', 'gray.700');
+    // Стили для карточек лотерей (легкий серый градиент, без рамки в светлой теме)
+    const cardBg = useColorModeValue(
+      'linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)',
+      '#000000'
+    );
+    const cardBorder = useColorModeValue('0', '#000000');
+    const cardBorderWidth = useColorModeValue('0px', '1px');
+    const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)');
+    const textColor = useColorModeValue('#000000', '#FFFFFF');
+    const outlineColor = useColorModeValue('#000000', '#FFFFFF');
+    const badgePriceBg = '#FFA500';
+    const badgePriceColor = '#000000';
+    const badgeRiskColor = '#000000';
+    const badgeTypeBorder = '#671600';
+    const buttonBg = '#671600';
+    const buttonColor = '#FFFFFF';
 
-  const handleRefineClick = () => {
-    console.log('[ResultsBlock] Клик по "Уточнить и выбрать один"');
-    onGoRefine();
-  };
+    const handleRefineClick = () => {
+      console.log('[ResultsBlock] Клик по "Уточнить и выбрать один"');
+      onGoRefine();
+    };
 
-  return (
-    <Stack>
-      <Heading size="sm">По твоим ответам лучше всего подошли эти лотереи:</Heading>
+    return (
+      <Stack>
+        <Heading size="md">По твоим ответам лучше всего подошли эти лотереи:</Heading>
 
-      <SimpleGrid
-        columns={{
-          base: 1,
-          md: bestLotteries.length === 2 ? 2 : 2,
-          xl: bestLotteries.length === 2 ? 2 : 3,
-        }}
-        gap="10px"
-      >
-        {bestLotteries.map((lottery) => (
-          <Box
-            key={lottery.id}
-            borderWidth="1px"
-            gap="15px"
-            borderColor={cardBorder}
-            borderRadius="xl"
-            p={4}
-            bg={cardBg}
-            boxShadow="sm"
-          >
-            <Stack>
-              <Heading size="xs">{lottery.name}</Heading>
+        <SimpleGrid columns={{ base: 1, md: bestLotteries.length === 2 ? 2 : 3 }} gap="10px">
+          {bestLotteries.map((lottery) => (
+            <Box
+              key={lottery.id}
+              borderWidth={cardBorderWidth}
+              borderColor={cardBorder}
+              borderRadius="xl"
+              p={4}
+              bg={cardBg}
+              boxShadow={cardShadow}
+            >
+              <Stack>
+                <Heading size="md">{lottery.name}</Heading>
+                <HStack>
+                  <Badge bg={badgePriceBg} color={badgePriceColor}>
+                    {lottery.minPrice} ₽
+                  </Badge>
+                  <Badge
+                    bg={
+                      lottery.risk === 'low'
+                        ? '#FFF42A'
+                        : lottery.risk === 'medium'
+                        ? '#FFA500'
+                        : '#FF4D4D'
+                    }
+                    color={badgeRiskColor}
+                  >
+                    Риск: {lottery.risk}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    fontSize="0.7rem"
+                    borderColor={badgeTypeBorder}
+                    color={outlineColor}
+                  >
+                    {lottery.drawType === 'draw' ? 'Тиражная' : 'Моментальная'}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    fontSize="0.7rem"
+                    borderColor={badgeTypeBorder}
+                    color={outlineColor}
+                  >
+                    {lottery.format === 'online' ? 'Онлайн' : 'Оффлайн'}
+                  </Badge>
+                </HStack>
 
-              <HStack flexWrap="wrap" alignItems="center">
-                <Badge colorScheme="blue">{lottery.minPrice} ₽</Badge>
-                <Badge
-                  colorScheme={
-                    lottery.risk === 'low' ? 'green' : lottery.risk === 'medium' ? 'yellow' : 'red'
-                  }
-                >
-                  Риск: {lottery.risk}
-                </Badge>
-                <Badge variant="outline" fontSize="0.65rem">
-                  {lottery.drawType === 'draw' ? 'Тиражная' : 'Моментальная'}
-                </Badge>
-                <Badge variant="outline" fontSize="0.65rem">
-                  {lottery.format === 'online' ? 'Онлайн' : 'Оффлайн'}
-                </Badge>
-              </HStack>
-
-              <Text fontSize="xs" color="gray.500">
-                {lottery.description}
-              </Text>
-
-              <Box pt={1}>
-                <Text fontSize="0.65rem" color="gray.500" mb={1}>
-                  Особенности:
+                <Text fontSize="15.12px" color={textColor}>
+                  {lottery.description}
                 </Text>
-                <Stack fontSize="0.7rem">
-                  {lottery.features.map((f) => (
-                    <Text key={f}>• {f}</Text>
-                  ))}
-                </Stack>
-              </Box>
-            </Stack>
-          </Box>
-        ))}
-      </SimpleGrid>
 
-      <HStack justify="space-between" pt={1}>
-        <Text fontSize="sm" color="gray.500">
-          Теперь ещё несколько уточняющих вопросов — и выберем один лучший вариант.
-        </Text>
-        <Button colorScheme="purple" size="sm" onClick={handleRefineClick}>
-          Уточнить и выбрать один
-        </Button>
-      </HStack>
-    </Stack>
-  );
-};
+                <Box pt={1}>
+                  <Text fontSize="15.12px" color={textColor} mb={1}>
+                    Особенности:
+                  </Text>
+                  <Stack fontSize="15.12px">
+                    {lottery.features.map((f) => (
+                      <Text key={f} color={textColor}>
+                        • {f}
+                      </Text>
+                    ))}
+                  </Stack>
+                </Box>
+              </Stack>
+            </Box>
+          ))}
+        </SimpleGrid>
+
+        <HStack justify="space-between" pt={1}>
+          <Text fontSize="15.12px" color={textColor}>
+            Теперь ещё несколько уточняющих вопросов — и выберем один лучший вариант.
+          </Text>
+          <Button
+            bg={buttonBg}
+            color={buttonColor}
+            size="sm"
+            onClick={handleRefineClick}
+            borderRadius="full"
+          >
+            Уточнить и выбрать один
+          </Button>
+        </HStack>
+      </Stack>
+    );
+  }
+);

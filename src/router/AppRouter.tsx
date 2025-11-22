@@ -1,30 +1,25 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+// src/app/AppRouter.tsx (или где он у тебя лежит)
 import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
-
-import { HomePage } from '@pages';
-import { Assistant } from '@/components/assistant/Assistant';
+import { AssistantPage, NotFoundPage } from '@pages';
 
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Главная страница ассистента */}
         <Route
           path="/"
           element={
             <Layout>
-              <HomePage />
+              <AssistantPage />
             </Layout>
           }
         />
-        <Route
-          path="/assistant"
-          element={
-            <Layout>
-              <Assistant />
-            </Layout>
-          }
-        />
+
+        {/* Любой неизвестный путь -> красивая 404 */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

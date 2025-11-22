@@ -6,8 +6,6 @@ import {
   type Profile,
   type Lottery,
   type StolotoGame,
-  pageBg,
-  chatBg,
   stolotoApi,
   mapStolotoGamesToLotteries,
   recommendationApi,
@@ -24,15 +22,22 @@ import { ResultsBlock } from '@/components/assistant/ui/ResultBlock';
 import { RefineWizard, type RefineWeights } from '@/components/assistant/ui/RefineWizard';
 import { FinalBlock } from '@/components/assistant/ui/FinalBlock';
 
+type StolotoDrawsResponse = {
+  games: StolotoGame[];
+  walletActive: boolean;
+  paymentsActive: boolean;
+  guestShufflerTicketsEnabled: boolean;
+  requestStatus: string;
+  errors: unknown[];
+};
+
 export const Assistant: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   // Полный список лотерей, с которыми работаем после первой анкеты
   const [lotteries, setLotteries] = useState<Lottery[]>([]);
-  console.log('[Assistant] Текущий массив lotteries:', lotteries);
 
-  // Список лучших лотерей из /best_of ПОСЛЕ ПЕРВОЙ АНКЕТЫ
-  // ВАЖНО: сюда кладём уже ОГРАНИЧЕННЫЙ массив длиной 4
+  // Список лучших лотерей из /best_of ПОСЛЕ ПЕРВОЙ АНКЕТЫ (ограниченный массив длиной 4)
   const [bestLotteries, setBestLotteries] = useState<Lottery[]>([]);
 
   // Финальная лотерея после второй анкеты — ровно одна
@@ -55,63 +60,39 @@ export const Assistant: React.FC = () => {
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
-  // === Загрузка игр Stoloto для быстрых рекомендаций (QuickRecommendations) ===
-  const fetchDraws = useCallback(async () => {
-    const requestId = Date.now();
-    const startedAt = performance.now();
+  // === Визуальные токены для контейнера ассистента ===
+  const chatSurfaceBg = useColorModeValue('rgba(255, 255, 255, 0.5)', 'rgba(0, 0, 0, 0.5)');
+  const borderColor = useColorModeValue('gray.400', 'black');
+  const textColor = useColorModeValue('#000000', '#FFFFFF');
+  const badgeBg = '#FFF42A';
+  const badgeColor = '#000000';
+  const spinnerColorResults = '#FFA500';
+  const spinnerColorRefine = '#671600';
+  const spinnerColorFinal = '#671600';
+  const containerShadow = useColorModeValue('none', '0px 0px 10px rgba(255, 255, 255, 0.2)');
 
-    console.groupCollapsed('[Assistant] [Stoloto] Старт запроса к backend (stolotoApi.getDraws)');
-    console.log('[Assistant] [Stoloto] requestId:', requestId);
-    console.log('[Assistant] [Stoloto] endpoint (обёртка):', 'stolotoApi.getDraws');
-    console.log('[Assistant] [Stoloto] payload:', 'без тела, GET-запрос через stolotoApi');
+  // === Загрузка игр Stoloto для быстрых рекомендаций (QuickRecommendations) ===
+  const fetchDraws = useCallback(async (): Promise<void> => {
+    setIsStolotoLoading(true);
+    setStolotoError(null);
 
     try {
-      setIsStolotoLoading(true);
-      setStolotoError(null);
-
-      const response = await stolotoApi.getDraws<{
-        games: StolotoGame[];
-        walletActive: boolean;
-        paymentsActive: boolean;
-        guestShufflerTicketsEnabled: boolean;
-        requestStatus: string;
-        errors: unknown[];
-      }>();
-
-      const durationMs = performance.now() - startedAt;
-      console.log('[Assistant] [Stoloto] raw response:', response);
-      console.log('[Assistant] [Stoloto] durationMs:', durationMs.toFixed(2));
+      const response = await stolotoApi.getDraws<StolotoDrawsResponse>();
 
       if (response.requestStatus !== 'success') {
-        console.warn(
-          '[Assistant] [Stoloto] requestStatus !== "success", считаем запрос неуспешным',
-          response.requestStatus
-        );
         setStolotoError('Не удалось получить данные Stoloto');
         setStolotoGames([]);
         return;
       }
 
-      console.log(
-        '[Assistant] [Stoloto] Успешный ответ, количество игр:',
-        response.games ? response.games.length : 0
-      );
-      setStolotoGames(response.games);
-    } catch (error) {
-      const durationMs = performance.now() - startedAt;
-      console.error('[Assistant] [Stoloto] Ошибка при запросе Stoloto:', error);
-      console.error('[Assistant] [Stoloto] durationMs (с ошибкой):', durationMs.toFixed(2));
+      setStolotoGames(response.games ?? []);
+    } catch {
       setStolotoError('Ошибка при запросе Stoloto');
       setStolotoGames([]);
     } finally {
-      console.log('[Assistant] [Stoloto] Завершение запроса, финальные стейты:', {
-        isStolotoLoading: false,
-        stolotoError: stolotoError,
-      });
-      console.groupEnd();
       setIsStolotoLoading(false);
     }
-  }, [stolotoError]);
+  }, []);
 
   useEffect(() => {
     void fetchDraws();
@@ -120,22 +101,13 @@ export const Assistant: React.FC = () => {
   // Stoloto → Lottery
   const stolotoLotteries: Lottery[] = useMemo(() => {
     if (!stolotoGames || stolotoGames.length === 0) return [];
-    const mapped = mapStolotoGamesToLotteries(stolotoGames);
-    console.log('[Assistant] Преобразование Stoloto -> Lottery', {
-      stolotoGamesCount: stolotoGames.length,
-      lotteriesCount: mapped.length,
-    });
-    return mapped;
+    return mapStolotoGamesToLotteries(stolotoGames);
   }, [stolotoGames]);
 
+  // Быстрые рекомендации (6 штук)
   const quickLotteries: Lottery[] = useMemo(() => {
     if (stolotoLotteries.length === 0) return [];
-    const sliced = stolotoLotteries.slice(0, 6);
-    console.log('[Assistant] Быстрые рекомендации (quickLotteries):', {
-      totalStolotoLotteries: stolotoLotteries.length,
-      quickLotteriesCount: sliced.length,
-    });
-    return sliced;
+    return stolotoLotteries.slice(0, 6);
   }, [stolotoLotteries]);
 
   // Автоскролл
@@ -213,9 +185,7 @@ export const Assistant: React.FC = () => {
     const hash01 = getDeterministicHash01(lottery.id);
 
     const win_rate = baseWinRate * (0.9 + 0.25 * (1 - priceNorm)) * (0.95 + 0.1 * hash01);
-
     const win_size = baseWinSize * (0.7 + 0.8 * priceNorm) * (0.95 + 0.1 * (1 - hash01));
-
     const frequency = baseFrequency * (0.95 + 0.15 * (1 - priceNorm)) * (0.96 + 0.08 * hash01);
 
     const ticket_cost = price;
@@ -237,7 +207,7 @@ export const Assistant: React.FC = () => {
   };
 
   const mapProfileToDesired = (p: Profile, weights?: RefineWeights): UniversalPropsWithK => {
-    const base = {
+    const base: RefineWeights = {
       win_rate_k: 1.0,
       win_size_k: 1.0,
       frequency_k: 1.0,
@@ -273,14 +243,8 @@ export const Assistant: React.FC = () => {
     limit?: number
   ): Promise<Lottery[]> => {
     if (!sourceLotteries || sourceLotteries.length === 0) {
-      console.warn(
-        '[Assistant] [/best_of] Нет лотерей для BestOf, запрос к backend не выполняется'
-      );
       return [];
     }
-
-    const requestId = Date.now();
-    const startedAt = performance.now();
 
     const desired = mapProfileToDesired(p, weights);
 
@@ -298,26 +262,11 @@ export const Assistant: React.FC = () => {
       p,
     };
 
-    console.groupCollapsed(
-      '[Assistant] [/best_of] Старт запроса к backend (recommendationApi.bestOf)'
-    );
-    console.log('[Assistant] [/best_of] requestId:', requestId);
-    console.log('[Assistant] [/best_of] payload.universal_props_with_k:', desired);
-    console.log('[Assistant] [/best_of] payload.real_values.length:', realValues.length);
-    console.log('[Assistant] [/best_of] пример первого real_value:', realValues[0]);
-    console.log('[Assistant] [/best_of] payload.profile:', p);
-
     try {
       const response: BestOfHandlerResponse = await recommendationApi.bestOf(payload);
 
-      const durationMs = performance.now() - startedAt;
-      console.log('[Assistant] [/best_of] raw response:', response);
-      console.log('[Assistant] [/best_of] durationMs:', durationMs.toFixed(2));
-
-      // Бэкенд и так шлёт отсортированный список, но на всякий случай дублируем сортировку
       const sortedByDiff = [...response].sort((a, b) => a.diff - b.diff);
 
-      // Мапа name -> Lottery, чтобы не терять порядок из sortedByDiff
       const byName = new Map<string, Lottery>();
       for (const lot of sourceLotteries) {
         byName.set(lot.name, lot);
@@ -329,46 +278,24 @@ export const Assistant: React.FC = () => {
         if (!lot) continue;
         topLotteries.push(lot);
 
-        // ВАЖНО: режем массив по limit, чтобы получить первые N элементов
         if (typeof limit === 'number' && limit > 0 && topLotteries.length >= limit) {
           break;
         }
       }
 
-      console.log('[Assistant] [/best_of] Итоговые topLotteries (с учётом limit):', {
-        limit,
-        count: topLotteries.length,
-        names: topLotteries.map((l) => l.name),
-      });
-
-      console.groupEnd();
       return topLotteries;
-    } catch (error) {
-      const durationMs = performance.now() - startedAt;
-      console.error('[Assistant] [/best_of] Ошибка при запросе /best_of:', error);
-      console.error('[Assistant] [/best_of] durationMs (с ошибкой):', durationMs.toFixed(2));
-      console.groupEnd();
+    } catch {
       return [];
     }
   };
 
   // ========= Завершение первой анкеты профиля =========
-
-  const handleProfileComplete = async (p: Profile) => {
-    console.log('[Assistant] handleProfileComplete START, profile:', p);
+  const handleProfileComplete = async (p: Profile): Promise<void> => {
     setProfile(p);
 
     const sourceLotteries = lotteries;
 
-    console.log(
-      '[Assistant] handleProfileComplete: количество лотерей для /best_of:',
-      sourceLotteries.length
-    );
-
     if (sourceLotteries.length === 0) {
-      console.warn(
-        '[Assistant] handleProfileComplete: lotteries пуст, /best_of вызываться не будет'
-      );
       setBestLotteries([]);
       setHasResults(false);
       return;
@@ -378,115 +305,84 @@ export const Assistant: React.FC = () => {
     setHasResults(false);
 
     try {
-      // ПЕРВЫЙ вызов /best_of — без дополнительных весов (все K = 1)
-      // И СРАЗУ ограничиваем результат: берём только ПЕРВЫЕ 4
       const top4 = await callBestOf(p, sourceLotteries, undefined, 4);
-      console.log(
-        '[Assistant] handleProfileComplete: результат /best_of, top4.length:',
-        top4.length
-      );
-
-      // В стейте лежит МАССИВ ровно из 4 лотерей, в том же порядке, как пришли
       setBestLotteries(top4);
       setHasResults(true);
-    } catch (error) {
-      console.error('[Assistant] handleProfileComplete: Ошибка при запросе /best_of:', error);
+    } catch {
       setBestLotteries([]);
       setHasResults(true);
     } finally {
-      console.log('[Assistant] handleProfileComplete FINISH. Стейты:', {
-        isLoadingResults: false,
-        hasResults: true,
-      });
       setIsLoadingResults(false);
     }
   };
 
   // Переход к уточняющим вопросам
-  const handleGoRefine = () => {
-    console.log('[Assistant] handleGoRefine вызван', {
-      hasRefine,
-      isRefineIntroLoading,
-      hasBestLotteries: bestLotteries.length > 0,
-      profileExists: !!profile,
-    });
-
+  const handleGoRefine = useCallback((): void => {
     if (hasRefine || isRefineIntroLoading || !profile || bestLotteries.length === 0) return;
+
     setIsRefineIntroLoading(true);
     setTimeout(() => {
       setIsRefineIntroLoading(false);
       setHasRefine(true);
     }, 700);
-  };
+  }, [hasRefine, isRefineIntroLoading, profile, bestLotteries.length]);
 
   // Второй вызов /best_of — после второй анкеты, уже с весами пользователя
-  const handleFinalFromRefine = async (weights: RefineWeights) => {
-    console.log('[Assistant] handleFinalFromRefine. Получены веса:', weights);
-
+  const handleFinalFromRefine = async (weights: RefineWeights): Promise<void> => {
     if (!profile) {
-      console.warn('[Assistant] handleFinalFromRefine: profile отсутствует, выходим');
       return;
     }
 
     if (!lotteries || lotteries.length === 0) {
-      console.warn(
-        '[Assistant] handleFinalFromRefine: lotteries пуст, не можем повторно вызвать /best_of'
-      );
       return;
     }
 
     setIsLoadingFinal(true);
 
     try {
-      // Второй вызов /best_of — с весами К. Берём РОВНО ПЕРВУЮ лотерею.
       const refinedTop1 = await callBestOf(profile, lotteries, weights, 1);
-
       const final = refinedTop1[0] ?? bestLotteries[0] ?? lotteries[0];
-      console.log(
-        '[Assistant] handleFinalFromRefine. Финальная лотерея после /best_of (1 элемент):',
-        final
-      );
 
       setFinalLottery(final);
       setHasFinal(true);
-    } catch (error) {
-      console.error('[Assistant] handleFinalFromRefine: ошибка при повторном /best_of:', error);
+    } catch {
+      // fallback поведения уже реализован через ?? выше
     } finally {
       setIsLoadingFinal(false);
     }
   };
 
   return (
-    <Box minH="100vh" bgGradient={pageBg()} py={4}>
+    <Box bg="transparent" minH="90vh" display="flex" flexDirection="column" flex="1">
       <Box
-        maxW="5xl"
-        minH="80vh"
-        mx="auto"
-        bg={chatBg()}
+        bg="black"
+        backdropFilter="blur(10px)"
         borderRadius={{ base: '0', md: '3xl' }}
         borderWidth={{ base: '0', md: '1px' }}
-        borderColor={useColorModeValue('gray.200', 'gray.700')}
-        boxShadow={{ base: 'none', md: '2xl' }}
+        borderColor={borderColor}
+        boxShadow={containerShadow}
         display="flex"
         flexDirection="column"
         overflow="hidden"
+        flex="1"
+        h="100%"
       >
         <Box
           px={{ base: 4, md: 6 }}
           py={3}
           borderBottomWidth="1px"
-          borderColor={useColorModeValue('gray.200', 'gray.700')}
+          borderColor={borderColor}
           display="flex"
           alignItems="center"
           justifyContent="space-between"
-          bg={useColorModeValue('whiteAlpha.900', 'gray.900')}
+          bg={chatSurfaceBg}
           backdropFilter="blur(8px)"
         >
           <Stack>
-            <Text fontSize="sm" fontWeight="semibold">
+            <Text fontSize="sm" fontWeight="semibold" color={textColor}>
               Лотерейный ассистент
             </Text>
-            <Text fontSize="xs" color="gray.500">
+            <Text fontSize="xs" color={textColor}>
               Подберу лотерею под твой стиль игры
             </Text>
           </Stack>
@@ -495,12 +391,12 @@ export const Assistant: React.FC = () => {
               w={8}
               h={8}
               borderRadius="full"
-              bgGradient="linear(to-br, blue.400, purple.500)"
+              bgGradient="linear(to-br, #FFA500, #671600)"
               display="flex"
               alignItems="center"
               justifyContent="center"
               fontSize="xs"
-              color="white"
+              color="#FFFFFF"
               boxShadow="md"
             >
               🎲
@@ -512,28 +408,24 @@ export const Assistant: React.FC = () => {
               borderRadius="full"
               px={3}
               py={1}
+              bg={badgeBg}
+              color={badgeColor}
             >
               online
             </Badge>
           </HStack>
         </Box>
 
-        <Box
-          ref={messagesRef}
-          px={{ base: 3, md: 5 }}
-          py={4}
-          maxH="calc(100vh - 96px)"
-          overflowY="auto"
-        >
+        <Box ref={messagesRef} px={{ base: 3, md: 5 }} py={4} flexGrow={1} overflowY="auto">
           <Stack>
             <ChatBubble role="assistant">
               <Stack>
-                <Text>
+                <Text color={textColor}>
                   Привет! 👋 Я помогу разобраться с лотереями: сначала покажу быстрые варианты, а
                   если не зайдут — настроим подбор под твой стиль игры.
                 </Text>
                 {isInitial && (
-                  <Text fontSize="sm" color="gray.400">
+                  <Text fontSize="15.12px" color={textColor}>
                     Можешь сразу посмотреть варианты ниже или запустить умный подбор.
                   </Text>
                 )}
@@ -548,20 +440,23 @@ export const Assistant: React.FC = () => {
                 lotteries={quickLotteries}
                 isLoading={isStolotoLoading}
                 error={stolotoError}
-                onRetry={fetchDraws}
+                onRetry={() => {
+                  void fetchDraws();
+                }}
               />
             </ChatBubble>
 
             {hasStartedQuestionnaire && (
               <>
                 <ChatBubble role="user">
-                  <Text fontSize="sm">Хочу настроить подбор под себя.</Text>
+                  <Text fontSize="15.12px" color={textColor}>
+                    Хочу настроить подбор под себя.
+                  </Text>
                 </ChatBubble>
                 <ChatBubble role="assistant">
                   <ProfileWizard
                     onComplete={handleProfileComplete}
                     onCancel={() => {
-                      console.log('[Assistant] ProfileWizard.onCancel вызван');
                       setHasStartedQuestionnaire(false);
                       setProfile(null);
                       setBestLotteries([]);
@@ -570,11 +465,7 @@ export const Assistant: React.FC = () => {
                       setHasFinal(false);
                       setFinalLottery(null);
                     }}
-                    onLotteriesChange={(nextLotteries) => {
-                      console.log(
-                        '[Assistant] ProfileWizard.onLotteriesChange, количество лотерей:',
-                        nextLotteries.length
-                      );
+                    onLotteriesChange={(nextLotteries: Lottery[]) => {
                       setLotteries(nextLotteries);
                     }}
                   />
@@ -586,8 +477,8 @@ export const Assistant: React.FC = () => {
               <ChatBubble role="assistant">
                 <Box py={2}>
                   <Center flexDirection="column">
-                    <Spinner size="md" color="blue.400" mb={3} />
-                    <Text fontSize="sm" color="gray.500" textAlign="center">
+                    <Spinner size="md" color={spinnerColorResults} mb={3} />
+                    <Text fontSize="15.12px" color={textColor} textAlign="center">
                       Анализирую твои ответы и подбираю лучшие варианты…
                     </Text>
                   </Center>
@@ -598,12 +489,13 @@ export const Assistant: React.FC = () => {
             {hasResults && (
               <>
                 <ChatBubble role="user">
-                  <Text fontSize="sm">Готов увидеть рекомендации, что ты подобрал?</Text>
+                  <Text fontSize="15.12px" color={textColor}>
+                    Готов увидеть рекомендации, что ты подобрал?
+                  </Text>
                 </ChatBubble>
                 <ChatBubble role="assistant">
                   <ResultsBlock
                     profile={profile}
-                    // ВАЖНО: здесь отдаём МАССИВ из 4 элементов, как вернул /best_of с limit=4
                     bestLotteries={bestLotteries}
                     onGoRefine={handleGoRefine}
                   />
@@ -615,8 +507,8 @@ export const Assistant: React.FC = () => {
               <ChatBubble role="assistant">
                 <Box py={2}>
                   <Center flexDirection="column">
-                    <Spinner size="sm" color="purple.400" mb={2} />
-                    <Text fontSize="sm" color="gray.500" textAlign="center">
+                    <Spinner size="sm" color={spinnerColorRefine} mb={2} />
+                    <Text fontSize="15.12px" color={textColor} textAlign="center">
                       Секунду, уточняю детали по этим лотереям…
                     </Text>
                   </Center>
@@ -627,18 +519,17 @@ export const Assistant: React.FC = () => {
             {hasRefine && profile && bestLotteries.length > 0 && (
               <>
                 <ChatBubble role="user">
-                  <Text fontSize="sm">
+                  <Text fontSize="15.12px" color={textColor}>
                     Давай уточним и выберем один лучший вариант с учётом того, что для меня важнее.
                   </Text>
                 </ChatBubble>
                 <ChatBubble role="assistant">
                   <Stack>
-                    <Text fontSize="sm">
+                    <Text fontSize="15.12px" color={textColor}>
                       Окей, ещё несколько уточняющих вопросов — и я пересчитаю подбор с учётом
                       важности параметров.
                     </Text>
                     <RefineWizard
-                      // На уточнение также отдаём эти 4 лотереи
                       lotteries={bestLotteries}
                       profile={profile}
                       onComplete={handleFinalFromRefine}
@@ -652,8 +543,8 @@ export const Assistant: React.FC = () => {
               <ChatBubble role="assistant">
                 <Box py={2}>
                   <Center flexDirection="column">
-                    <Spinner size="md" color="purple.400" mb={3} />
-                    <Text fontSize="sm" color="gray.500" textAlign="center">
+                    <Spinner size="md" color={spinnerColorFinal} mb={3} />
+                    <Text fontSize="15.12px" color={textColor} textAlign="center">
                       Пересчитываю рекомендации с учётом твоих приоритетов…
                     </Text>
                   </Center>
@@ -664,7 +555,7 @@ export const Assistant: React.FC = () => {
             {hasFinal && finalLottery && profile && (
               <>
                 <ChatBubble role="user">
-                  <Text fontSize="sm">
+                  <Text fontSize="15.12px" color={textColor}>
                     Хочу остановиться на одном варианте, покажи итоговую рекомендацию.
                   </Text>
                 </ChatBubble>

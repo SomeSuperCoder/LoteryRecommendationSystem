@@ -4,17 +4,18 @@ import Header from '@components/header/Header';
 import Footer from '@components/footer/Footer';
 import AppBackground from '@/components/layout/AppBackground';
 import { LayoutProps } from '@lib';
+import { useColorMode } from '@components/ui/color-mode';
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <Flex direction="column" minH="100vh">
-      <Header />
-      <AppBackground>
-        <Box as="main" flex="1">
+    <AppBackground>
+      <Flex direction="column" minH="100vh">
+        <Header />
+        <Box as="main" flex="1" display="flex" flexDirection="column" pt="60px">
           {children}
         </Box>
-      </AppBackground>
-      <Footer />
-    </Flex>
+        <Footer />
+      </Flex>
+    </AppBackground>
   );
 };

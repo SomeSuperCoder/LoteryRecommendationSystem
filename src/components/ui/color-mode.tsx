@@ -1,3 +1,4 @@
+// color-mode.tsx
 import type { IconButtonProps, SpanProps } from '@chakra-ui/react';
 import { ClientOnly, IconButton, Skeleton, Span } from '@chakra-ui/react';
 import { ThemeProvider, useTheme } from 'next-themes';
@@ -76,7 +77,7 @@ export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(function L
 ) {
   return (
     <Span
-      color="fg"
+      color="#000000"
       display="contents"
       className="chakra-theme light"
       colorPalette="gray"
@@ -90,7 +91,7 @@ export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(function L
 export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(function DarkMode(props, ref) {
   return (
     <Span
-      color="fg"
+      color="#FFFFFF"
       display="contents"
       className="chakra-theme dark"
       colorPalette="gray"
