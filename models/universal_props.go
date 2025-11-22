@@ -9,6 +9,7 @@ type UniversalPropsWithK struct {
 }
 
 type UniversalProps struct {
+	Name       string  `json:"name"`
 	WinRate    float64 `json:"win_rate"`
 	WinSize    float64 `json:"win_size"`
 	Frequency  float64 `json:"frequency"`
@@ -22,7 +23,8 @@ type DiffedUniversalProps struct {
 	TicketCost float64 `json:"ticket_cost"`
 }
 
-type UniversalPropsWithCalcualtedDiff struct {
+type UniversalPropsWithCalcualtedDiffAndName struct {
 	Diff           float64        `json:"diff"`
+	Name           string         `json:"name"`
 	UniversalProps UniversalProps `json:"universal_props"`
 }

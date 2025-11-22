@@ -1,5 +1,5 @@
 package models
 
 type Response struct {
-	Recommendations []Lotery
+	Recommendations []Lotery `json:"recommendations"`
 }

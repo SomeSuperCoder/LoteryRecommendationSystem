@@ -6,8 +6,8 @@ import (
 	"github.com/SomeSuperCoder/global-chat/models"
 )
 
-func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalProps) []models.UniversalPropsWithCalcualtedDiff {
-	processed := make([]models.UniversalPropsWithCalcualtedDiff, len(realValues))
+func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalProps) []models.UniversalPropsWithCalcualtedDiffAndName {
+	processed := make([]models.UniversalPropsWithCalcualtedDiffAndName, len(realValues))
 
 	for i, real := range realValues {
 		// Normalize all fields
@@ -31,8 +31,9 @@ func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalPr
 		diffSum := diffed.Frequency + diffed.TicketCost + diffed.WinRate + diffed.WinSize
 
 		// Convert into a wrapped type and add into the processed array
-		processed[i] = models.UniversalPropsWithCalcualtedDiff{
+		processed[i] = models.UniversalPropsWithCalcualtedDiffAndName{
 			Diff:           diffSum,
+			Name:           real.Name,
 			UniversalProps: real,
 		}
 	}

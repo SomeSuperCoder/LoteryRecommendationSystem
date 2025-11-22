@@ -9,5 +9,5 @@ type UserForm struct {
 	Prop1 string
 	Prop2 string
 	// Actual stuff
-	Type Type
+	Type Type `json:"type"`
 }

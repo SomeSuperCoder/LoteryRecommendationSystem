@@ -57,7 +57,6 @@ func DoesFullfilCondition(obj any, condition models.Prop) (bool, error) {
 			return true, nil
 		}
 	}
-	// --------------------------------------
 
 	return false, nil
 }
