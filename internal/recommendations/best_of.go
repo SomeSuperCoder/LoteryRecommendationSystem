@@ -13,19 +13,10 @@ func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalPr
 		// Normalize all fields
 		diffed := &models.DiffedUniversalProps{}
 
-		diffed.Frequency = +DiffPercentage(desired.Frequency, real.Frequency) * desired.FrequencyK
-		// log.Println("Freq", diffed.Frequency)
-
+		diffed.Frequency = -DiffPercentage(desired.Frequency, real.Frequency) * desired.FrequencyK
 		diffed.TicketCost = -DiffPercentage(desired.TicketCost, real.TicketCost) * desired.TicketCostK
-		// log.Println("TicketCost", diffed.TicketCost)
-
 		diffed.WinRate = +DiffPercentage(desired.WinRate, real.WinRate) * desired.WinRateK
-		// log.Println("WinRate", diffed.WinRate)
-		// log.Println(desired.WinRate)
-		// log.Println(real.WinRate)
-
 		diffed.WinSize = +DiffPercentage(desired.WinSize, real.WinSize) * desired.WinSizeK
-		// log.Println("WinSize", diffed.WinSize)
 
 		// Diff sum
 		diffSum := diffed.Frequency + diffed.TicketCost + diffed.WinRate + diffed.WinSize
@@ -38,7 +29,7 @@ func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalPr
 		}
 	}
 
-	// The less the better
+	// The less/more the better
 	// TODO: ask if there will be a problem
 	sort.Slice(processed, func(i, j int) bool {
 		if processed[i].Diff != processed[j].Diff {
