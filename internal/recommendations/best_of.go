@@ -29,7 +29,7 @@ func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalPr
 		}
 	}
 
-	// The less/more the better
+	// The less the better
 	// TODO: ask if there will be a problem
 	sort.Slice(processed, func(i, j int) bool {
 		return processed[i].Diff < processed[j].Diff
