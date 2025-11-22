@@ -1,4 +1,3 @@
-// src/components/assistant/Assistant.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Text, Stack, HStack, Badge, Spinner, Center } from '@chakra-ui/react';
 import { useColorModeValue } from '@/components/ui/color-mode';
@@ -74,7 +73,6 @@ export const Assistant: React.FC = () => {
     }, 800);
   };
 
-  // симуляция «ассистент думает», перед показом RefineWizard
   const handleGoRefine = () => {
     if (hasRefine || isRefineIntroLoading || !profile || bestLotteries.length === 0) return;
     setIsRefineIntroLoading(true);
@@ -94,19 +92,23 @@ export const Assistant: React.FC = () => {
   };
 
   return (
-    <Box minH="100vh" bgGradient={pageBg()} py={4}>
+    <Box 
+      bgGradient={pageBg()} 
+      minH="90vh"
+      display="flex" 
+      flexDirection="column"
+      flex="1" // **Ключевое изменение: позволяет Box растянуться на всю высоту родителя**
+    >
       <Box
-        maxW="5xl"
-        minH="80vh"
-        mx="auto"
         bg={chatBg()}
         borderRadius={{ base: '0', md: '3xl' }}
         borderWidth={{ base: '0', md: '1px' }}
         borderColor={useColorModeValue('gray.200', 'gray.700')}
-        boxShadow={{ base: 'none', md: '2xl' }}
         display="flex"
         flexDirection="column"
         overflow="hidden"
+        flex="1" // **Ключевое изменение: позволяет внутреннему Box заполнить всю высоту**
+        h="100%"
       >
         <Box
           px={{ base: 4, md: 6 }}
@@ -159,7 +161,7 @@ export const Assistant: React.FC = () => {
           ref={messagesRef}
           px={{ base: 3, md: 5 }}
           py={4}
-          maxH="calc(100vh - 96px)"
+          flexGrow={1}
           overflowY="auto"
         >
           <Stack>
@@ -177,7 +179,6 @@ export const Assistant: React.FC = () => {
               </Stack>
             </ChatBubble>
 
-            {/* Быстрые рекомендации с собственной симуляцией загрузки внутри */}
             <ChatBubble role="assistant">
               <QuickRecommendations
                 hasStartedQuestionnaire={hasStartedQuestionnaire}
@@ -234,7 +235,6 @@ export const Assistant: React.FC = () => {
               </>
             )}
 
-            {/* Загрузка перед уточняющими вопросами */}
             {isRefineIntroLoading && (
               <ChatBubble role="assistant">
                 <Box py={2}>

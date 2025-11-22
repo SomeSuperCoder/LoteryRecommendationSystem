@@ -2,8 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import React from 'react';
 import { Layout } from '@/components/layout/Layout';
 
-import { HomePage } from '@pages';
-import { Assistant } from '@/components/assistant/Assistant';
+import { HomePage, AssistantPage } from '@pages';
 
 export const AppRouter: React.FC = () => {
   return (
@@ -21,7 +20,7 @@ export const AppRouter: React.FC = () => {
           path="/assistant"
           element={
             <Layout>
-              <Assistant />
+              <AssistantPage />
             </Layout>
           }
         />

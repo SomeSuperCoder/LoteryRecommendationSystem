@@ -26,30 +26,37 @@ const Header = () => {
       px={8}
       borderBottomWidth="1px"
       borderColor="border.muted"
-      bg="bg.panel"
+      bg="transparent"
       backdropFilter={isScrolled ? 'blur(10px)' : 'none'}
-      opacity={isScrolled ? 0.7 : 1}
       transition="all 0.3s"
       position="sticky"
       top={0}
       zIndex="sticky"
     >
       <Box>
-        <Image src={logo} boxSize="40px" cursor={'pointer'}></Image>
+        <Link key="main" href="/">
+            <Image src={logo} boxSize="40px" cursor={'pointer'}></Image>
+        </Link>
       </Box>
 
       <HStack gap={8} display={{ base: 'none', md: 'flex' }}>
-        {links.map((link) => (
-          <Link
-            key={link.label}
-            href={link.href}
-            fontWeight="medium"
-            _hover={{ textDecoration: 'none', color: 'fg.subtle' }}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </HStack>
+        {links.map((link) => {
+            const isExternal = link.href.startsWith('http') || link.href.includes('://');
+
+            return (
+            <Link
+                key={link.label}
+                href={link.href}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noopener noreferrer' : undefined}
+                fontWeight="medium"
+                _hover={{ textDecoration: 'none', color: 'fg.subtle' }}
+            >
+                {link.label}
+            </Link>
+            );
+        })}
+        </HStack>
 
       <Box>
         <ColorModeButton />

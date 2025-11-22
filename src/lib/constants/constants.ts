@@ -133,7 +133,7 @@ export const pageBg = () =>
 export const chatBg = () => useColorModeValue('gray.50', 'gray.850');
 
 export const links = [
-  { label: 'Главная', href: '#' },
-  { label: 'О нас', href: '#' },
-  { label: 'Контакты', href: '#' },
+  { label: 'Чат бот', href: '/assistant' },
+  { label: 'Лотереи', href: '#' },
+  { label: 'Столото', href: 'https://www.stoloto.ru' },
 ];

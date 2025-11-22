@@ -7,14 +7,14 @@ import { LayoutProps } from '@lib';
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <Flex direction="column" minH="100vh">
-      <Header />
-      <AppBackground>
-        <Box as="main" flex="1">
+    <AppBackground>
+      <Flex direction="column" minH="100vh">
+        <Header />
+        <Box as="main" flex="1" display="flex" flexDirection="column" overflow="hidden">
           {children}
         </Box>
-      </AppBackground>
-      <Footer />
-    </Flex>
+        <Footer />
+      </Flex>
+    </AppBackground>
   );
 };
