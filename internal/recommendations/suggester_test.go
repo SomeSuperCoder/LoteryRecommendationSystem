@@ -17,8 +17,7 @@ func asAnySlice[T any](s []T) []any {
 
 func TestSuggester(t *testing.T) {
 	testForm := &models.UserForm{
-		Prop1: "expensive",
-		Prop2: "simple",
+		Type: "instant",
 	}
 	recommendations := []models.Recommendation{
 		{
@@ -27,36 +26,23 @@ func TestSuggester(t *testing.T) {
 			},
 			Props: []models.Prop{
 				{
-					Field: "Prop1",
+					Field: "Type",
 					AllowedValues: asAnySlice([]string{
-						"cheap",
+						"instant", "any",
 					}),
-					PositiveWhy: "Not expensive",
-					NegativeWhy: "",
 				},
 			},
 		},
 		{
 			Payload: models.Lotery{
-				Name: "Second lotery",
+				Name: "Second lобразомotery",
 			},
 			Props: []models.Prop{
 				{
-					Field: "Prop1",
+					Field: "Type",
 					AllowedValues: asAnySlice([]string{
-						"expensive",
+						"tirazh", "any",
 					}),
-					PositiveWhy: "",
-					NegativeWhy: "",
-				},
-				{
-					Field: "Prop2",
-					AllowedValues: asAnySlice([]string{
-						"simple",
-						"moderate",
-					}),
-					PositiveWhy: "Simple enough for you",
-					NegativeWhy: "Too complicated for you!",
 				},
 			},
 		},
@@ -70,10 +56,10 @@ func TestSuggester(t *testing.T) {
 }
 
 func TestDiffPercentage(t *testing.T) {
-	if DiffPercentage(100, 10) != -0.9 {
+	if DiffPercentage(100, 10) != 0.9 {
 		t.Fail()
 	}
-	if DiffPercentage(4, 5) != 0.25 {
+	if DiffPercentage(4, 5) != -0.25 {
 		t.Fail()
 	}
 }

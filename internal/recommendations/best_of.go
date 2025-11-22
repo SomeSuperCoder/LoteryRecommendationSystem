@@ -20,6 +20,8 @@ func BestOf(desired *models.UniversalProps, realValues []models.UniversalProps) 
 		log.Println("TicketCost", diffed.TicketCost)
 		diffed.WinRate = +DiffPercentage(desired.WinRate, real.WinRate)
 		log.Println("WinRate", diffed.WinRate)
+		log.Println(desired.WinRate)
+		log.Println(real.WinRate)
 		diffed.WinSize = +DiffPercentage(desired.WinSize, real.WinSize)
 		log.Println("WinSize", diffed.WinSize)
 

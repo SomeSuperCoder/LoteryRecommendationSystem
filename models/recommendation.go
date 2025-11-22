@@ -8,8 +8,6 @@ type Recommendation struct {
 type Prop struct {
 	Field         string
 	AllowedValues []any
-	PositiveWhy   string
-	NegativeWhy   string
 }
 
 type AllowedValue struct {

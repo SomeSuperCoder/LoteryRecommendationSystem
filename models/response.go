@@ -1,15 +1,9 @@
 package models
 
 type Response struct {
-	Recommendations []ResponseEntry
+	Recommendations []Lotery
 }
 
 type ResponseEntry struct {
-	Payload   Lotery
-	GoodProps []PropResult
-	BadProps  []PropResult
-}
-
-type PropResult struct {
-	Why string
+	Payload Lotery
 }

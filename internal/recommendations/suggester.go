@@ -8,13 +8,9 @@ import (
 )
 
 func GetSuggestionsFor(form *models.UserForm, recommendations []models.Recommendation) (*models.Response, error) {
-	entries := make([]models.ResponseEntry, len(recommendations))
+	entries := make([]models.Lotery, 0)
 
-	for i, recommendation := range recommendations {
-		// Define prop categories
-		goodProps := make([]models.PropResult, 0)
-		badProps := make([]models.PropResult, 0)
-
+	for _, recommendation := range recommendations {
 		// Go through all props and categoroze them
 		for _, prop := range recommendation.Props {
 			doesFullfil, err := DoesFullfilCondition(form, prop)
@@ -22,44 +18,16 @@ func GetSuggestionsFor(form *models.UserForm, recommendations []models.Recommend
 				return nil, err
 			}
 			if doesFullfil {
-				resultProp := PropToResultProp(&prop, true)
-				if resultProp.Why == "" {
-					continue
-				}
-				goodProps = append(goodProps, *resultProp)
-			} else {
-				resultProp := PropToResultProp(&prop, false)
-				if resultProp.Why == "" {
-					continue
-				}
-				badProps = append(badProps, *resultProp)
+				// Write the result to the entries list
+				entries = append(entries, recommendation.Payload)
 			}
 		}
 
-		// Write the result to the entries list
-		entries[i] = models.ResponseEntry{
-			Payload:   recommendation.Payload,
-			GoodProps: goodProps,
-			BadProps:  badProps,
-		}
 	}
 
 	return &models.Response{
 		Recommendations: entries,
 	}, nil
-}
-
-func PropToResultProp(prop *models.Prop, positive bool) *models.PropResult {
-	var why string
-	if positive {
-		why = prop.PositiveWhy
-	} else {
-		why = prop.NegativeWhy
-	}
-
-	return &models.PropResult{
-		Why: why,
-	}
 }
 
 func DoesFullfilCondition(obj any, condition models.Prop) (bool, error) {
@@ -78,11 +46,14 @@ func DoesFullfilCondition(obj any, condition models.Prop) (bool, error) {
 		return false, fmt.Errorf("field %s not found", condition.Field)
 	}
 
-	// Old implementation
-	currentFieldValue := field.Interface()
+	if !field.IsValid() || field.Kind() != reflect.String {
+		return false, fmt.Errorf("field %s is not a valid string", condition.Field)
+	}
+
+	str := field.String()
+
 	for _, desiredValue := range condition.AllowedValues {
-		equal := reflect.DeepEqual(currentFieldValue, desiredValue)
-		if equal {
+		if str == desiredValue {
 			return true, nil
 		}
 	}
