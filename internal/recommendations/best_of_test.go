@@ -15,7 +15,6 @@ func TestBestOf(t *testing.T) {
 			Frequency:  15,
 			WinSize:    1000,
 		},
-		WinRateK: 1,
 	}
 
 	DefaultKs(desiredWithKs)
@@ -29,8 +28,8 @@ func TestBestOf(t *testing.T) {
 		},
 		{
 			WinRate:    10,
-			TicketCost: 160,
-			Frequency:  15,
+			TicketCost: 150,
+			Frequency:  19,
 			WinSize:    1000,
 		},
 	}
