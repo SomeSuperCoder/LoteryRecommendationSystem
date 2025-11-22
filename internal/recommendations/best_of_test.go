@@ -15,11 +15,10 @@ func TestBestOf(t *testing.T) {
 			Frequency:  15,
 			WinSize:    1000,
 		},
-		WinRateK: 100000,
+		WinRateK: 1,
 	}
 
 	DefaultKs(desiredWithKs)
-	desired := desiredWithKs.AsUniversalProps()
 
 	real := []models.UniversalProps{
 		{
@@ -29,13 +28,13 @@ func TestBestOf(t *testing.T) {
 			WinSize:    1000,
 		},
 		{
-			WinRate:    20,
+			WinRate:    11,
 			TicketCost: 160,
 			Frequency:  15,
 			WinSize:    1000,
 		},
 	}
 
-	res := BestOf(desired, real)
+	res := BestOf(desiredWithKs, real)
 	log.Println(res)
 }

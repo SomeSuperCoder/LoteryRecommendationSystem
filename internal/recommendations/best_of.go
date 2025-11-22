@@ -1,29 +1,31 @@
 package recommendations
 
 import (
-	"log"
 	"sort"
 
 	"github.com/SomeSuperCoder/global-chat/models"
 )
 
-func BestOf(desired *models.UniversalProps, realValues []models.UniversalProps) []models.UniversalPropsWithCalcualtedDiff {
+func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalProps) []models.UniversalPropsWithCalcualtedDiff {
 	processed := make([]models.UniversalPropsWithCalcualtedDiff, len(realValues))
 
 	for i, real := range realValues {
 		// Normalize all fields
 		diffed := &models.DiffedUniversalProps{}
 
-		diffed.Frequency = +DiffPercentage(desired.Frequency, real.Frequency)
-		log.Println("Freq", diffed.Frequency)
-		diffed.TicketCost = -DiffPercentage(desired.TicketCost, real.TicketCost)
-		log.Println("TicketCost", diffed.TicketCost)
-		diffed.WinRate = +DiffPercentage(desired.WinRate, real.WinRate)
-		log.Println("WinRate", diffed.WinRate)
-		log.Println(desired.WinRate)
-		log.Println(real.WinRate)
-		diffed.WinSize = +DiffPercentage(desired.WinSize, real.WinSize)
-		log.Println("WinSize", diffed.WinSize)
+		diffed.Frequency = +DiffPercentage(desired.Frequency, real.Frequency) * desired.FrequencyK
+		// log.Println("Freq", diffed.Frequency)
+
+		diffed.TicketCost = -DiffPercentage(desired.TicketCost, real.TicketCost) * desired.TicketCostK
+		// log.Println("TicketCost", diffed.TicketCost)
+
+		diffed.WinRate = +DiffPercentage(desired.WinRate, real.WinRate) * desired.WinRateK
+		// log.Println("WinRate", diffed.WinRate)
+		// log.Println(desired.WinRate)
+		// log.Println(real.WinRate)
+
+		diffed.WinSize = +DiffPercentage(desired.WinSize, real.WinSize) * desired.WinSizeK
+		// log.Println("WinSize", diffed.WinSize)
 
 		// Diff sum
 		diffSum := diffed.Frequency + diffed.TicketCost + diffed.WinRate + diffed.WinSize

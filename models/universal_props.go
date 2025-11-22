@@ -10,10 +10,10 @@ type UniversalPropsWithK struct {
 
 func (u *UniversalPropsWithK) AsUniversalProps() *UniversalProps {
 	return &UniversalProps{
-		WinRate:    u.WinRate * u.WinRateK,
-		WinSize:    u.WinSize * u.WinSize,
-		Frequency:  u.Frequency * u.FrequencyK,
-		TicketCost: u.TicketCost * u.TicketCostK,
+		WinRate:    u.WinRate,
+		WinSize:    u.WinSize,
+		Frequency:  u.Frequency,
+		TicketCost: u.TicketCost,
 	}
 }
 

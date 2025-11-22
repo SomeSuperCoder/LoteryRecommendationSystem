@@ -10,10 +10,6 @@ type Prop struct {
 	AllowedValues []any
 }
 
-type AllowedValue struct {
-	Value any
-}
-
 type Lotery struct {
 	Name string
 }

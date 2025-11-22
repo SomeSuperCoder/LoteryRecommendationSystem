@@ -20,9 +20,8 @@ func BestOfHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	recommendations.DefaultKs(&request.Desired)
-	desired := request.Desired.AsUniversalProps()
 
-	result := recommendations.BestOf(desired, request.RealValues)
+	result := recommendations.BestOf(&request.Desired, request.RealValues)
 
 	json.NewEncoder(w).Encode(result)
 }
