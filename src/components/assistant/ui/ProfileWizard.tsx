@@ -1,245 +1,508 @@
-import { useState, useCallback, useMemo } from 'react';
-import { STEPS, type ProfileWizardProps, type Profile, type Field, type Answer } from '@lib';
-import { Stack, Box, HStack, Text, Progress, Heading, Button, Slider } from '@chakra-ui/react';
+// src/components/assistant/ui/ProfileWizard.tsx
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  STEPS,
+  type ProfileWizardProps,
+  type Profile,
+  type Field,
+  type Answer,
+  stolotoApi,
+  type Lottery,
+} from '@/lib';
+import { Stack, Box, HStack, Text, Heading, Button, Slider, Progress } from '@chakra-ui/react';
 import { useColorModeValue } from '@/components/ui/color-mode';
-import React from 'react';
 
-export const ProfileWizard: React.FC<ProfileWizardProps> = React.memo(({ onComplete, onCancel }) => {
-  const [stepIndex, setStepIndex] = useState(0);
-  const [profile, setProfile] = useState<Profile>({
-    style: null,
-    budget: null,
-    frequency: null,
-    ticket_cost: null,
-    transparency: null,
-    win_rate: null,
-    win_size: null,
-    motivation: null,
-    risk: null,
-    format: null,
-    drawType: null,
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+type StyleValue = 'instant' | 'tirage' | 'any';
 
-  const currentStep = STEPS[stepIndex];
+type StolotoDrawsResponse = {
+  games: any[];
+  [key: string]: unknown;
+};
 
-  const defaultWinRate = 40;
-  const defaultWinSizeRange: [number, number] = [100_000, 500_000];
+type MomentCard = {
+  lotteryId: string;
+  displayedName?: string;
+  ticketPriceInfo?: string;
+  superPrizeValue?: string;
+  lotterySlogan?: string;
+  [key: string]: unknown;
+};
 
-  const handleSelect = useCallback((field: Field, value: Answer) => {
-    if (isSubmitting) return;
-    setProfile((prev) => ({ ...prev, [field]: value }));
-    if (error) setError(null);
-  }, [isSubmitting, error]);
+type MomentalResponse = {
+  data: {
+    title: string;
+    titleColorHex: string | null;
+    momentCards: MomentCard[];
+    [key: string]: unknown;
+  }[];
+  [key: string]: unknown;
+};
 
-  const handleWinRateChange = useCallback((value: number) => {
-    if (isSubmitting) return;
-    setProfile((prev) => ({ ...prev, win_rate: value }));
-    if (error) setError(null);
-  }, [isSubmitting, error]);
+const parsePrice = (priceStr?: string): number => {
+  if (!priceStr) return 0;
+  const digits = priceStr.replace(/\s/g, '').match(/\d+/g);
+  if (!digits) return 0;
+  return Number(digits.join('')) || 0;
+};
 
-  const handleWinSizeChange = useCallback((min: number, max: number) => {
-    if (isSubmitting) return;
-    const avg = (min + max) / 2;
-    setProfile((prev) => ({ ...prev, win_size: avg }));
-    if (error) setError(null);
-  }, [isSubmitting, error]);
+export const ProfileWizard: React.FC<ProfileWizardProps> = React.memo(
+  ({ onComplete, onCancel, onLotteriesChange }) => {
+    const [stepIndex, setStepIndex] = useState(0);
+    const [profile, setProfile] = useState<Profile>({
+      style: null,
+      budget: null,
+      frequency: null,
+      ticket_cost: null,
+      transparency: null,
+      win_rate: null,
+      win_size: null,
+      motivation: null,
+      risk: null,
+      format: null,
+      drawType: null,
+    });
+    const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleNext = useCallback(() => {
-    if (isSubmitting) return;
+    const [styleCache, setStyleCache] = useState<Record<StyleValue, Lottery[]>>({
+      instant: [],
+      tirage: [],
+      any: [],
+    });
 
-    if (!profile[currentStep.field]) {
-      setError('Выбери один из вариантов или поправь ползунок, чтобы продолжить.');
-      return;
-    }
+    const [lastStyleRequested, setLastStyleRequested] = useState<StyleValue | null>(null);
+    const [isLoadingStyle, setIsLoadingStyle] = useState(false);
 
-    if (stepIndex === STEPS.length - 1) {
-      setIsSubmitting(true);
-      onComplete(profile);
-      return;
-    }
+    const currentStep = STEPS[stepIndex];
 
-    const nextStepIndex = stepIndex + 1;
-    const nextField = STEPS[nextStepIndex]?.field;
+    const defaultWinRate = 40;
+    const defaultWinSizeRange: [number, number] = [100_000, 500_000];
 
-    if (nextField) {
-        setProfile((prev) => {
-            let newProfile = prev;
+    // Дефолты для win_rate / win_size при заходе на соответствующий шаг
+    useEffect(() => {
+      const field = STEPS[stepIndex].field;
 
-            if (nextField === 'win_rate' && prev.win_rate == null) {
-                newProfile = { ...newProfile, win_rate: defaultWinRate };
-            }
+      if (field === 'win_rate' && profile.win_rate == null) {
+        setProfile((prev) => ({ ...prev, win_rate: defaultWinRate }));
+      }
 
-            if (nextField === 'win_size' && prev.win_size == null) {
-                const avg = (defaultWinSizeRange[0] + defaultWinSizeRange[1]) / 2;
-                newProfile = { ...newProfile, win_size: avg };
-            }
-            
-            return newProfile;
-        });
-    }
+      if (field === 'win_size' && profile.win_size == null) {
+        const avg = (defaultWinSizeRange[0] + defaultWinSizeRange[1]) / 2;
+        setProfile((prev) => ({ ...prev, win_size: avg }));
+      }
+    }, [stepIndex, profile.win_rate, profile.win_size, defaultWinRate, defaultWinSizeRange]);
 
-    setStepIndex((i) => i + 1);
-  }, [isSubmitting, profile, currentStep.field, stepIndex, onComplete]);
+    const mapDrawsToLotteries = (games: any[]): Lottery[] =>
+      games.map((game) => {
+        const name: string = game.name ?? 'Без названия';
+        return {
+          id: String(game.name ?? game.draw?.id ?? Math.random()),
+          name,
+          minPrice: game.draw?.betCost ?? 100,
+          risk: 'medium',
+          drawType: 'draw',
+          format: 'online',
+          description: `Тиражная лотерея ${name}`,
+          features: [
+            'Тиражный розыгрыш',
+            'Подходит для регулярной игры',
+            game.completedDraw?.superPrize
+              ? `Суперприз: ${game.completedDraw.superPrize} ₽`
+              : 'Фиксированные призы',
+          ],
+        };
+      });
 
-  const handleBack = useCallback(() => {
-    if (isSubmitting) return;
-    setError(null);
-    if (stepIndex === 0) {
-      onCancel();
-      return;
-    }
-    setStepIndex((i) => i - 1);
-  }, [isSubmitting, stepIndex, onCancel]);
+    const mapMomentCardsToLotteries = (cards: MomentCard[]): Lottery[] =>
+      cards.map((card) => {
+        const name = card.displayedName ?? card.lotteryId;
+        const minPrice = parsePrice(card.ticketPriceInfo);
+        return {
+          id: card.lotteryId,
+          name,
+          minPrice,
+          risk: 'low',
+          drawType: 'instant',
+          format: 'offline',
+          description: card.lotterySlogan
+            ? card.lotterySlogan
+            : `Моментальная лотерея ${name}, результат сразу после стирания защитного слоя.`,
+          features: [
+            card.ticketPriceInfo ? `Цена билета: ${card.ticketPriceInfo}` : 'Доступная цена',
+            card.superPrizeValue ? `Суперприз: ${card.superPrizeValue}` : 'Много мелких призов',
+            'Результат сразу',
+          ],
+        };
+      });
 
-  const progressPercent = useMemo(() => {
-    return STEPS.length > 1 ? (stepIndex / (STEPS.length - 1)) * 100 : 100;
-  }, [stepIndex]);
+    const handleStyleRequest = async (style: StyleValue): Promise<Lottery[] | null> => {
+      console.log('[ProfileWizard] handleStyleRequest, style:', style);
+      try {
+        if (style === 'instant') {
+          const instantResponse = await stolotoApi.getMomental<MomentalResponse>();
 
-  // Если profile.win_rate null, используем defaultWinRate для отображения
-  const winRateValue = (profile.win_rate as number | null) ?? defaultWinRate;
+          const instantCards =
+            Array.isArray(instantResponse.data) && instantResponse.data[0]
+              ? instantResponse.data[0].momentCards ?? []
+              : [];
 
-  const textColor = useColorModeValue('#000000', '#FFFFFF');
-  const errorColor = '#FF4D4D';
-  const buttonActiveBg = '#671600';
-  const buttonActiveColor = '#FFFFFF';
-  const buttonInactiveColor = useColorModeValue('#000000', '#FFFFFF');
-  const buttonBorderColor = '#671600';
-  const backButtonColor = useColorModeValue('#000000', '#FFFFFF');
-  const nextButtonBg = '#671600';
-  const nextButtonColor = '#FFFFFF';
-  const progressTrackBg = '#671600';
-  const progressRangeBg = '#FFF42A';
+          const normalized = mapMomentCardsToLotteries(instantCards);
+          console.log('[ProfileWizard] Получены моментальные лотереи:', normalized.length);
+          return normalized;
+        }
 
-  return (
-    <Stack>
-      <Box>
-        <HStack justify="space-between" mb={2}>
-          <Text fontSize="15.12px" color={textColor}>
-            Анкета: шаг {stepIndex + 1} из {STEPS.length}
-          </Text>
-          <Text fontSize="15.12px" color={textColor}>
-            {Math.round(progressPercent)}%
-          </Text>
-        </HStack>
-        <Progress.Root variant="outline" maxW="auto" value={progressPercent} colorPalette="green">
-          <Progress.Track bg={progressTrackBg}>
-            <Progress.Range bg={progressRangeBg} />
-          </Progress.Track>
-        </Progress.Root>
-      </Box>
+        if (style === 'tirage') {
+          const drawsResponse = await stolotoApi.getDraws<StolotoDrawsResponse>();
 
-      <Stack>
-        <Heading size="md">{currentStep.title}</Heading>
+          const drawsGames = Array.isArray(drawsResponse.games) ? drawsResponse.games : [];
+          const drawsWithoutLast = drawsGames.slice(0, -1);
 
-        {currentStep.options.length > 0 && (
-          <Stack>
-            {currentStep.options.map((opt) => {
-              const active = profile[currentStep.field] === opt.value;
-              return (
-                <Button
-                  key={String(opt.value)}
-                  variant={active ? 'solid' : 'outline'}
-                  bg={active ? buttonActiveBg : undefined}
-                  color={active ? buttonActiveColor : buttonInactiveColor}
-                  justifyContent="flex-start"
-                  w="100%"
-                  borderRadius="full"
-                  size="md"
-                  fontWeight="normal"
-                  whiteSpace="normal"
-                  textAlign="left"
-                  py={3}
-                  px={4}
-                  onClick={() => handleSelect(currentStep.field, opt.value)}
-                  disabled={isSubmitting}
-                  borderColor={buttonBorderColor}
-                >
-                  <Box as="span" w="100%" textAlign="left" fontSize="17.28px">
-                    {opt.label}
-                  </Box>
-                </Button>
+          const normalized = mapDrawsToLotteries(drawsWithoutLast);
+          console.log('[ProfileWizard] Получены тиражные лотереи:', normalized.length);
+          return normalized;
+        }
+
+        if (style === 'any') {
+          const [instantResponse, drawsResponse] = await Promise.all([
+            stolotoApi.getMomental<MomentalResponse>(),
+            stolotoApi.getDraws<StolotoDrawsResponse>(),
+          ]);
+
+          const instantCards =
+            Array.isArray(instantResponse.data) && instantResponse.data[0]
+              ? instantResponse.data[0].momentCards ?? []
+              : [];
+
+          const drawsGames = Array.isArray(drawsResponse.games) ? drawsResponse.games : [];
+          const drawsWithoutLast = drawsGames.slice(0, -1);
+
+          const instantLotteries = mapMomentCardsToLotteries(instantCards);
+          const tirageLotteries = mapDrawsToLotteries(drawsWithoutLast);
+
+          const merged = [...instantLotteries, ...tirageLotteries];
+          console.log('[ProfileWizard] Получены все лотереи (any):', merged.length);
+          return merged;
+        }
+
+        return null;
+      } catch (e) {
+        console.error('Ошибка при запросе Stoloto по выбору стиля:', e);
+        return null;
+      }
+    };
+
+    const handleSelect = useCallback(
+      (field: Field, value: Answer) => {
+        if (isSubmitting) return;
+        console.log('[ProfileWizard] Выбор ответа', { field, value });
+        setProfile((prev) => ({ ...prev, [field]: value }));
+        if (error) setError(null);
+      },
+      [isSubmitting, error]
+    );
+
+    const handleWinRateChange = useCallback(
+      (value: number) => {
+        if (isSubmitting) return;
+        console.log('[ProfileWizard] Смена win_rate слайдера:', value);
+        setProfile((prev) => ({ ...prev, win_rate: value }));
+        if (error) setError(null);
+      },
+      [isSubmitting, error]
+    );
+
+    const handleWinSizeChange = useCallback(
+      (min: number, max: number) => {
+        if (isSubmitting) return;
+        const avg = (min + max) / 2;
+        console.log('[ProfileWizard] Смена win_size диапазона:', { min, max, avg });
+        setProfile((prev) => ({ ...prev, win_size: avg }));
+        if (error) setError(null);
+      },
+      [isSubmitting, error]
+    );
+
+    const handleNext = useCallback(async () => {
+      if (isSubmitting) return;
+
+      if (!profile[currentStep.field]) {
+        setError('Выбери один из вариантов или поправь ползунок, чтобы продолжить.');
+        return;
+      }
+
+      // Первый шаг — выбор стиля, тянем лотереи из Stoloto + кэш
+      if (stepIndex === 0 && profile.style) {
+        const style = profile.style as StyleValue;
+        console.log('[ProfileWizard] Первый шаг (style), выбран стиль:', style);
+
+        if (styleCache[style] && styleCache[style].length > 0) {
+          console.log(
+            '[ProfileWizard] Используем кэш для стиля',
+            style,
+            ', количество:',
+            styleCache[style].length
+          );
+          if (onLotteriesChange) {
+            onLotteriesChange(styleCache[style]);
+          }
+        } else {
+          try {
+            setIsLoadingStyle(true);
+            const lotteries = await handleStyleRequest(style);
+            setIsLoadingStyle(false);
+
+            if (lotteries && lotteries.length > 0) {
+              setStyleCache((prev) => ({
+                ...prev,
+                [style]: lotteries,
+              }));
+              setLastStyleRequested(style);
+              console.log(
+                '[ProfileWizard] Сохранён кэш для стиля',
+                style,
+                ', количество:',
+                lotteries.length
               );
-            })}
-          </Stack>
-        )}
 
-        {currentStep.field === 'win_rate' && (
-          <Box pt={2}>
-            <Slider.Root
-              maxW="sm"
-              size="sm"
-              min={1}
-              max={100}
-              defaultValue={[winRateValue]}
-              onValueChange={(details) => {
-                const vArray = details.value as number[]; 
-                if (!vArray || vArray.length === 0) return;
-                handleWinRateChange(vArray[0]);
-              }}
-            >
-              <HStack justify="space-between" mb={1}>
-                <Slider.Label fontSize="17.28px">Желаемая частота выигрышей</Slider.Label>
-                <Slider.ValueText />
-              </HStack>
-              <Slider.Control>
-                <Slider.Track bg={progressTrackBg}>
-                  <Slider.Range bg={progressRangeBg} />
-                </Slider.Track>
-                <Slider.Thumbs />
-              </Slider.Control>
-            </Slider.Root>
-            <Text fontSize="15.12px" color={textColor} mt={2}>
-              Сейчас выбрано примерно {winRateValue}% раз, когда ты ожидаешь выигрыш.
+              if (onLotteriesChange) {
+                onLotteriesChange(lotteries);
+              }
+            } else {
+              console.warn('Стиль выбран, но лотерей не пришло.');
+            }
+          } catch (e) {
+            setIsLoadingStyle(false);
+            console.error('Ошибка при запросе по стилю:', e);
+          }
+        }
+      }
+
+      if (stepIndex === STEPS.length - 1) {
+        console.log('[ProfileWizard] Последний шаг анкеты, отправляем профиль:', profile);
+        setIsSubmitting(true);
+        onComplete(profile);
+        return;
+      }
+
+      const nextStepIndex = stepIndex + 1;
+      const nextField = STEPS[nextStepIndex]?.field;
+
+      if (nextField) {
+        setProfile((prev) => {
+          let newProfile = prev;
+
+          if (nextField === 'win_rate' && prev.win_rate == null) {
+            newProfile = { ...newProfile, win_rate: defaultWinRate };
+          }
+
+          if (nextField === 'win_size' && prev.win_size == null) {
+            const avg = (defaultWinSizeRange[0] + defaultWinSizeRange[1]) / 2;
+            newProfile = { ...newProfile, win_size: avg };
+          }
+
+          return newProfile;
+        });
+      }
+
+      console.log('[ProfileWizard] Переход на следующий шаг', stepIndex + 1);
+      setStepIndex((i) => i + 1);
+    }, [
+      isSubmitting,
+      profile,
+      currentStep.field,
+      stepIndex,
+      styleCache,
+      onLotteriesChange,
+      defaultWinRate,
+      defaultWinSizeRange,
+    ]);
+
+    const handleBack = useCallback(() => {
+      if (isSubmitting) return;
+      setError(null);
+      if (stepIndex === 0) {
+        console.log('[ProfileWizard] Назад с первого шага — вызываем onCancel');
+        onCancel();
+        return;
+      }
+      console.log('[ProfileWizard] Переход на предыдущий шаг', stepIndex - 1);
+      setStepIndex((i) => i - 1);
+    }, [isSubmitting, stepIndex, onCancel]);
+
+    const progressPercent = useMemo(() => {
+      return STEPS.length > 1 ? (stepIndex / (STEPS.length - 1)) * 100 : 100;
+    }, [stepIndex]);
+
+    const winRateValue = (profile.win_rate as number | null) ?? defaultWinRate;
+
+    const textColor = useColorModeValue('#000000', '#FFFFFF');
+    const errorColor = '#FF4D4D';
+    const buttonActiveBg = '#671600';
+    const buttonActiveColor = '#FFFFFF';
+    const buttonInactiveColor = useColorModeValue('#000000', '#FFFFFF');
+    const buttonBorderColor = '#671600';
+    const backButtonColor = useColorModeValue('#000000', '#FFFFFF');
+    const nextButtonBg = '#671600';
+    const nextButtonColor = '#FFFFFF';
+    const progressTrackBg = '#671600';
+    const progressRangeBg = '#FFF42A';
+
+    return (
+      <Stack>
+        <Box>
+          <HStack justify="space-between" mb={2}>
+            <Text fontSize="15.12px" color={textColor}>
+              Анкета: шаг {stepIndex + 1} из {STEPS.length}
             </Text>
-          </Box>
-        )}
-
-        {currentStep.field === 'win_size' && (
-          <Box pt={2}>
-            <Slider.Root
-              width="260px"
-              min={10_000}
-              max={1_000_000}
-              step={10_000}
-              defaultValue={defaultWinSizeRange} 
-              minStepsBetweenThumbs={1}
-              onValueChange={(details) => {
-                const vArray = details.value as number[];
-                if (!vArray || vArray.length < 2) return;
-                handleWinSizeChange(vArray[0], vArray[1]);
-              }}
-            >
-              <Slider.Control>
-                <Slider.Track bg={progressTrackBg}>
-                  <Slider.Range bg={progressRangeBg} />
-                </Slider.Track>
-                <Slider.Thumbs />
-              </Slider.Control>
-            </Slider.Root>
-            <Text fontSize="15.12px" color={textColor} mt={2}>
-              Средний желаемый размер выигрыша:{' '}
-              {profile.win_size ? `${Math.round(profile.win_size as number)} ₽` : 'пока не задан'}.
+            <Text fontSize="15.12px" color={textColor}>
+              {Math.round(progressPercent)}%
             </Text>
-          </Box>
-        )}
+          </HStack>
 
-        {error && (
-          <Text fontSize="15.12px" color={errorColor}>
-            {error}
-          </Text>
-        )}
+          <Progress.Root
+            variant="outline"
+            maxW="auto"
+            value={progressPercent}
+            colorPalette="orange"
+          >
+            <Progress.Track bg={progressTrackBg}>
+              <Progress.Range bg={progressRangeBg} />
+            </Progress.Track>
+          </Progress.Root>
+
+          {stepIndex === 0 && isLoadingStyle && (
+            <Text mt={1} fontSize="xs" color="gray.500">
+              Подбираю подходящие лотереи под твой стиль…
+            </Text>
+          )}
+        </Box>
+
+        <Stack>
+          <Heading size="md">{currentStep.title}</Heading>
+
+          {currentStep.options.length > 0 && (
+            <Stack>
+              {currentStep.options.map((opt) => {
+                const active = profile[currentStep.field] === opt.value;
+                return (
+                  <Button
+                    key={String(opt.value)}
+                    variant={active ? 'solid' : 'outline'}
+                    bg={active ? buttonActiveBg : undefined}
+                    color={active ? buttonActiveColor : buttonInactiveColor}
+                    justifyContent="flex-start"
+                    w="100%"
+                    borderRadius="full"
+                    size="md"
+                    fontWeight="normal"
+                    whiteSpace="normal"
+                    textAlign="left"
+                    py={3}
+                    px={4}
+                    onClick={() => handleSelect(currentStep.field, opt.value)}
+                    disabled={isSubmitting}
+                    borderColor={buttonBorderColor}
+                  >
+                    <Box as="span" w="100%" textAlign="left" fontSize="17.28px">
+                      {opt.label}
+                    </Box>
+                  </Button>
+                );
+              })}
+            </Stack>
+          )}
+
+          {currentStep.field === 'win_rate' && (
+            <Box pt={2}>
+              <Slider.Root
+                maxW="sm"
+                size="sm"
+                min={1}
+                max={100}
+                defaultValue={[winRateValue]}
+                onValueChange={(details) => {
+                  const vArray = details.value as number[];
+                  if (!vArray || vArray.length === 0) return;
+                  handleWinRateChange(vArray[0]);
+                }}
+              >
+                <HStack justify="space-between" mb={1}>
+                  <Slider.Label fontSize="17.28px">Желаемая частота выигрышей</Slider.Label>
+                  <Slider.ValueText />
+                </HStack>
+                <Slider.Control>
+                  <Slider.Track bg={progressTrackBg}>
+                    <Slider.Range bg={progressRangeBg} />
+                  </Slider.Track>
+                  <Slider.Thumbs />
+                </Slider.Control>
+              </Slider.Root>
+              <Text fontSize="15.12px" color={textColor} mt={2}>
+                Сейчас выбрано примерно {winRateValue}% раз, когда ты ожидаешь выигрыш.
+              </Text>
+            </Box>
+          )}
+
+          {currentStep.field === 'win_size' && (
+            <Box pt={2}>
+              <Slider.Root
+                width="260px"
+                min={10_000}
+                max={1_000_000}
+                step={10_000}
+                defaultValue={defaultWinSizeRange}
+                minStepsBetweenThumbs={1}
+                onValueChange={(details) => {
+                  const vArray = details.value as number[];
+                  if (!vArray || vArray.length < 2) return;
+                  handleWinSizeChange(vArray[0], vArray[1]);
+                }}
+              >
+                <Slider.Control>
+                  <Slider.Track bg={progressTrackBg}>
+                    <Slider.Range bg={progressRangeBg} />
+                  </Slider.Track>
+                  <Slider.Thumbs />
+                </Slider.Control>
+              </Slider.Root>
+              <Text fontSize="15.12px" color={textColor} mt={2}>
+                Средний желаемый размер выигрыша:{' '}
+                {profile.win_size ? `${Math.round(profile.win_size as number)} ₽` : 'пока не задан'}
+                .
+              </Text>
+            </Box>
+          )}
+
+          {error && (
+            <Text fontSize="15.12px" color={errorColor}>
+              {error}
+            </Text>
+          )}
+        </Stack>
+
+        <HStack justify="space-between" pt={1}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            disabled={isSubmitting}
+            color={backButtonColor}
+            borderRadius="full"
+          >
+            Назад
+          </Button>
+          <Button
+            bg={nextButtonBg}
+            color={nextButtonColor}
+            size="sm"
+            onClick={() => void handleNext()}
+            disabled={isSubmitting}
+            borderRadius="full"
+          >
+            {stepIndex === STEPS.length - 1 ? 'Показать рекомендации' : 'Далее'}
+          </Button>
+        </HStack>
       </Stack>
-
-      <HStack justify="space-between" pt={1}>
-        <Button variant="ghost" size="sm" onClick={handleBack} disabled={isSubmitting} color={backButtonColor} borderRadius="full">
-          Назад
-        </Button>
-        <Button bg={nextButtonBg} color={nextButtonColor} size="sm" onClick={handleNext} disabled={isSubmitting} borderRadius="full">
-          {stepIndex === STEPS.length - 1 ? 'Показать рекомендации' : 'Далее'}
-        </Button>
-      </HStack>
-    </Stack>
-  );
-});
+    );
+  }
+);

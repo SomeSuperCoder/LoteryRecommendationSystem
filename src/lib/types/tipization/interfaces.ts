@@ -51,6 +51,7 @@ export interface ChatBubbleProps {
 export interface ProfileWizardProps {
   onComplete: (profile: Profile) => void;
   onCancel: () => void;
+  onLotteriesChange: (lotteries: Lottery[]) => void;
 }
 
 export interface MicroAnswers {
@@ -97,3 +98,81 @@ export interface FinalBlockProps {
 export interface LayoutProps {
   children: React.ReactNode;
 }
+
+// src/lib/types/tipization/types.ts
+
+export interface StolotoDraw {
+  id: number;
+  number: number;
+  date: number; // unix timestamp (секунды)
+  superPrize: number;
+  jackpots?: unknown[];
+}
+
+export interface StolotoCompletedDraw {
+  number: number;
+  date: number; // unix timestamp
+  totalPrize: number;
+  superPrize: number;
+  combination: Record<string, unknown>;
+}
+
+export interface StolotoGame {
+  name: string;
+  active: boolean;
+  combinationsSelector: unknown[];
+  mainCombinationsSelector: unknown[];
+  maxBetSize: number;
+  maxTicketCost: number;
+  maxTicketCostVip: number;
+  voice: string;
+  yandexActive: boolean;
+  yandexYookassacard: boolean;
+  draw: StolotoDraw;
+  completedDraw: StolotoCompletedDraw;
+  nextDraw?: StolotoDraw;
+}
+
+export interface StolotoGamesResponse {
+  games: StolotoGame[];
+  walletActive: boolean;
+  paymentsActive: boolean;
+  guestShufflerTicketsEnabled: boolean;
+  requestStatus: string;
+  errors: unknown[];
+}
+
+// src/lib/types/recommendation.ts
+
+// Полностью соответствует Go-структуре UniversalProps
+export interface UniversalProps {
+  name: string;
+  win_rate: number;
+  win_size: number;
+  frequency: number;
+  ticket_cost: number;
+}
+
+// Полностью соответствует Go-структуре UniversalPropsWithK
+export interface UniversalPropsWithK extends UniversalProps {
+  win_rate_k: number;
+  win_size_k: number;
+  frequency_k: number;
+  ticket_cost_k: number;
+}
+
+// Соответствует UniversalPropsWithCalcualtedDiffAndName
+export interface UniversalPropsWithCalculatedDiffAndName {
+  diff: number;
+  name: string;
+  universal_props: UniversalProps;
+}
+
+// Запрос к BestOfHandler
+export interface BestOfHandlerRequest {
+  universal_props_with_k: UniversalPropsWithK;
+  real_values: UniversalProps[];
+}
+
+// Ответ от BestOfHandler (slice UniversalPropsWithCalculatedDiffAndName)
+export type BestOfHandlerResponse = UniversalPropsWithCalculatedDiffAndName[];

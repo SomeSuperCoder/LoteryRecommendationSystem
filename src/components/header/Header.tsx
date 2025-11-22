@@ -2,15 +2,15 @@ import { Flex, HStack, Link, Box, Text } from '@chakra-ui/react';
 import { ColorModeButton, useColorMode, useColorModeValue } from '@components/ui/color-mode';
 import { Image } from '@chakra-ui/react';
 import { links } from '@lib';
-import logoLight from '@lib/assets/images/LogoLight.svg'; 
-import logoDark from '@lib/assets/images/LogoDark.svg'; 
+import logoLight from '@lib/assets/images/LogoLight.svg';
+import logoDark from '@lib/assets/images/LogoDark.svg';
 
 const Header = () => {
   const { colorMode } = useColorMode();
   const logoSrc = colorMode === 'light' ? logoLight : logoDark;
-  
+
   const titleColor = useColorModeValue('gray.800', '#FFF42A');
-    
+
   const textStyles = {
     fontFamily: 'Unbounded, sans-serif',
     fontWeight: '600',
@@ -38,29 +38,29 @@ const Header = () => {
     >
       <HStack>
         <Box>
-          <Link 
-              key="main" 
-              href="/"
+          <Link
+            key="main"
+            href="/"
+            border="none"
+            borderWidth={0}
+            outline="none"
+            boxShadow="none"
+            _focus={{
+              boxShadow: 'none',
+              outline: 'none',
+              border: 'none',
+            }}
+          >
+            <Image
+              src={logoSrc}
+              boxSize="40px"
+              cursor={'pointer'}
+              opacity={0.85}
               border="none"
               borderWidth={0}
               outline="none"
               boxShadow="none"
-              _focus={{ 
-                  boxShadow: 'none',
-                  outline: 'none', 
-                  border: 'none' 
-              }}
-          >
-              <Image 
-                  src={logoSrc} 
-                  boxSize="40px" 
-                  cursor={'pointer'}
-                  opacity={0.85}
-                  border="none" 
-                  borderWidth={0}
-                  outline="none"
-                  boxShadow="none"
-              ></Image>
+            ></Image>
           </Link>
         </Box>
         <Text color={titleColor} {...textStyles}>
@@ -70,22 +70,22 @@ const Header = () => {
 
       <HStack gap={8} display={{ base: 'none', md: 'flex' }}>
         {links.map((link) => {
-            const isExternal = link.href.startsWith('http') || link.href.includes('://');
+          const isExternal = link.href.startsWith('http') || link.href.includes('://');
 
-            return (
+          return (
             <Link
-                key={link.label}
-                href={link.href}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noopener noreferrer' : undefined}
-                fontWeight="medium"
-                _hover={{ textDecoration: 'none', color: 'fg.subtle' }}
+              key={link.label}
+              href={link.href}
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+              fontWeight="medium"
+              _hover={{ textDecoration: 'none', color: 'fg.subtle' }}
             >
-                {link.label}
+              {link.label}
             </Link>
-            );
+          );
         })}
-        </HStack>
+      </HStack>
 
       <Box>
         <ColorModeButton />
