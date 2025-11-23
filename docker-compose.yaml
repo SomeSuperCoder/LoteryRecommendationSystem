@@ -15,3 +15,14 @@ services:
     restart: always
     ports:
       - "9090:9090"
+  web:
+    build:
+      context: ./frontend/
+      dockerfile: ./Dockerfile
+    image: stoloto_web
+    restart: always
+    depends_on:
+      - recommendations_api
+      - stoloto_api
+    ports:
+      - "80:80"
