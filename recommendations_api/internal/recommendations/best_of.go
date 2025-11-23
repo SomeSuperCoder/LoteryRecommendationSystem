@@ -26,6 +26,7 @@ func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalPr
 		// Convert into a wrapped type and add into the processed array
 		processed[i] = models.UniversalPropsWithCalcualtedDiffAndName{
 			Diff:           absDiffSum,
+			DiffWithSign:   diffSum,
 			Name:           real.Name,
 			UniversalProps: real,
 		}
@@ -34,7 +35,11 @@ func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalPr
 	// The less the better
 	// TODO: ask if there will be a problem
 	sort.Slice(processed, func(i, j int) bool {
-		return processed[i].Diff < processed[j].Diff
+		if processed[i].Diff != processed[j].Diff {
+			return processed[i].Diff < processed[j].Diff
+		}
+
+		return processed[i].DiffWithSign < processed[j].DiffWithSign
 	})
 
 	return processed

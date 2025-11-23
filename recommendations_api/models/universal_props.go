@@ -24,6 +24,7 @@ type DiffedUniversalProps struct {
 }
 
 type UniversalPropsWithCalcualtedDiffAndName struct {
+	DiffWithSign   float64        `json:"diff_with_sign"`
 	Diff           float64        `json:"diff"`
 	Name           string         `json:"name"`
 	UniversalProps UniversalProps `json:"universal_props"`
