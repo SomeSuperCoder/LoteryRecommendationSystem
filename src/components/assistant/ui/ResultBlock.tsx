@@ -9,9 +9,10 @@ export const ResultsBlock: React.FC<ResultsBlockProps> = ({
   bestLotteries,
   onGoRefine,
 }) => {
-  const cardBg = useColorModeValue('#FFFFFF', '#000000');
-  const cardBorder = useColorModeValue('#808080', '#000000');
-  const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)'); // White shadow for dark theme
+  const cardBg = useColorModeValue('linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)', '#000000');
+  const cardBorder = useColorModeValue('0', '#000000');
+  const cardBorderWidth = useColorModeValue('0px', '1px');
+  const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)');
   const textColor = useColorModeValue('#000000', '#FFFFFF');
   const outlineColor = useColorModeValue('#000000', '#FFFFFF');
   const badgePriceBg = '#FFA500';
@@ -31,12 +32,12 @@ export const ResultsBlock: React.FC<ResultsBlockProps> = ({
         {bestLotteries.map((lottery) => (
           <Box
             key={lottery.id}
-            borderWidth="1px"
+            borderWidth={cardBorderWidth}
             borderColor={cardBorder}
             borderRadius="xl"
             p={4}
             bg={cardBg}
-            boxShadow={cardShadow} // Applied here
+            boxShadow={cardShadow}
           >
             <Stack>
               <Heading size="xs">{lottery.name}</Heading>
@@ -78,7 +79,7 @@ export const ResultsBlock: React.FC<ResultsBlockProps> = ({
         <Text fontSize="sm" color={textColor}>
           Теперь ещё несколько уточняющих вопросов — и выберем один лучший вариант.
         </Text>
-        <Button bg={buttonBg} color={buttonColor} size="sm" onClick={onGoRefine}>
+        <Button bg={buttonBg} color={buttonColor} size="sm" onClick={onGoRefine} borderRadius="full"> {/* Made more rounded */}
           Уточнить и выбрать один
         </Button>
       </HStack>

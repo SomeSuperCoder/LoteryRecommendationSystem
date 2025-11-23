@@ -16,9 +16,11 @@ export const FinalBlock: React.FC<FinalBlockProps> = ({
   setHasFinal,
   setIsLoadingFinal,
 }) => {
-  const cardBg = useColorModeValue('#FFFFFF', '#000000');
-  const cardBorder = useColorModeValue('#808080', '#000000');
-  const cardShadow = useColorModeValue('lg', '0px 0px 10px rgba(255, 255, 255, 0.2)'); // White shadow for dark theme
+  const cardBg = useColorModeValue('linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)', '#000000');
+  const cardBorder = useColorModeValue('0', '#000000');
+  const cardBorderWidth = useColorModeValue('0px', '1px');
+  const cardShadow = useColorModeValue('lg', '0px 0px 10px rgba(255, 255, 255, 0.2)');
+  
   const textColor = useColorModeValue('#000000', '#FFFFFF');
   const outlineColor = useColorModeValue('#000000', '#FFFFFF');
   const badgePriceBg = '#FFA500';
@@ -35,12 +37,12 @@ export const FinalBlock: React.FC<FinalBlockProps> = ({
       <Heading size="sm">С учётом всех ответов тебе больше всего подходит:</Heading>
 
       <Box
-        borderWidth="1px"
+        borderWidth={cardBorderWidth}
         borderColor={cardBorder}
         borderRadius="2xl"
         p={5}
         bg={cardBg}
-        boxShadow={cardShadow} // Applied here
+        boxShadow={cardShadow} 
       >
         <Heading size="md" mb={2}>
           {finalLottery.name}
@@ -103,6 +105,7 @@ export const FinalBlock: React.FC<FinalBlockProps> = ({
         }
         bg={buttonBg}
         color={buttonColor}
+        borderRadius="full" // Made more rounded
       >
         Начать подбор заново
       </Button>

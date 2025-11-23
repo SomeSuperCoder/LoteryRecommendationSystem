@@ -55,13 +55,13 @@ export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, 
 
   const textColor = useColorModeValue('#000000', '#FFFFFF');
   const errorColor = '#FF4D4D';
-  const buttonActiveBg = '#671600'; // Standardized
-  const buttonActiveColor = '#FFFFFF'; // Standardized
-  const buttonInactiveColor = useColorModeValue('#000000', '#FFFFFF'); // Changed to use color mode for inactive text
+  const buttonActiveBg = '#671600';
+  const buttonActiveColor = '#FFFFFF';
+  const buttonInactiveColor = useColorModeValue('#000000', '#FFFFFF');
   const buttonBorderColor = '#671600';
   const backButtonColor = useColorModeValue('#000000', '#FFFFFF');
-  const nextButtonBg = '#671600'; // Standardized
-  const nextButtonColor = '#FFFFFF'; // Standardized
+  const nextButtonBg = '#671600';
+  const nextButtonColor = '#FFFFFF';
   const progressTrackBg = '#671600';
   const progressRangeBg = '#FFF42A';
 
@@ -96,7 +96,7 @@ export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, 
                 color={active ? buttonActiveColor : buttonInactiveColor}
                 justifyContent="flex-start"
                 w="100%"
-                borderRadius="lg"
+                borderRadius="full" // Made more rounded
                 size="sm"
                 fontWeight="normal"
                 whiteSpace="normal"
@@ -120,10 +120,10 @@ export const RefineWizard: React.FC<RefineWizardProps> = ({ lotteries, profile, 
       </Stack>
 
       <HStack justify="space-between" pt={2}>
-        <Button variant="ghost" size="sm" onClick={handleBack} disabled={isSubmitting} color={backButtonColor}>
+        <Button variant="ghost" size="sm" onClick={handleBack} disabled={isSubmitting} color={backButtonColor} borderRadius="full"> {/* Made more rounded */}
           Назад
         </Button>
-        <Button bg={nextButtonBg} color={nextButtonColor} size="sm" onClick={handleNext} disabled={isSubmitting}>
+        <Button bg={nextButtonBg} color={nextButtonColor} size="sm" onClick={handleNext} disabled={isSubmitting} borderRadius="full"> {/* Made more rounded */}
           {stepIndex === MICRO_STEPS.length - 1 ? 'Выбрать лучший вариант' : 'Далее'}
         </Button>
       </HStack>

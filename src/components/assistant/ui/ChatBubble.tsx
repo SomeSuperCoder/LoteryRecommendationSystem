@@ -7,17 +7,32 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ role, children }) => {
   const isAssistant = role === 'assistant';
   const isUser = role === 'user';
 
+  // --- START CHANGE: Легкий бело-оранжевый градиент (#FFF7F5) для светлой темы ---
+  // Используем #FFF7F5 для легкого оранжевого (персикового) оттенка
+  const lightAssistantBg = 'linear-gradient(180deg, #FFFFFF 0%, #FFF7F5 100%)'; 
+  const darkAssistantBg = '#000000';
+  
   const bubbleBg = useColorModeValue(
-    isAssistant ? '#FFFFFF' : isUser ? '#FFA500' : '#FFFFFF',
-    isAssistant ? '#000000' : isUser ? '#FFA500' : '#000000'
+    isAssistant ? lightAssistantBg : isUser ? '#FFA500' : lightAssistantBg,
+    isAssistant ? darkAssistantBg : isUser ? '#FFA500' : darkAssistantBg
   );
+  
+  // Убираем рамку для ассистента в светлой теме (0px)
+  const bubbleBorderWidth = useColorModeValue(
+    isAssistant ? '0px' : isUser ? '1px' : '0px',
+    isAssistant ? '1px' : isUser ? '1px' : '1px' 
+  );
+  
+  // Цвет рамки
   const bubbleBorder = useColorModeValue(
-    isAssistant ? '#808080' : isUser ? '#FFA500' : '#808080',
-    isAssistant ? '#000000' : isUser ? '#FFA500' : '#000000'
+    isUser ? '#FFA500' : 'transparent', 
+    isAssistant ? '#000000' : isUser ? '#FFA500' : '#000000' 
   );
+  // --- END CHANGE ---
+  
   const textColor = useColorModeValue(isUser ? '#000000' : '#000000', '#FFFFFF');
 
-  // New: Shadow for assistant bubble in dark mode
+  // Тень для ассистента
   const bubbleShadow = useColorModeValue(
     isAssistant ? 'md' : 'none',
     isAssistant ? '0px 0px 10px rgba(255, 255, 255, 0.2)' : 'none'
@@ -31,11 +46,11 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ role, children }) => {
     <Box display="flex" justifyContent={justifyContent}>
       <Box
         maxW={maxWidth}
-        bg={bubbleBg}
+        bg={bubbleBg} // Применяем градиент
         borderRadius="2xl"
-        borderWidth="1px"
-        borderColor={bubbleBorder}
-        boxShadow={bubbleShadow} // Applied here
+        borderWidth={bubbleBorderWidth} // Динамическая ширина рамки
+        borderColor={bubbleBorder} // Динамический цвет рамки
+        boxShadow={bubbleShadow}
         p={{ base: 4, md: 5 }}
         color={textColor}
       >

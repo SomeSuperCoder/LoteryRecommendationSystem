@@ -27,12 +27,13 @@ export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const initialLotteries = useMemo(() => getInitialLotteries(), []);
-  const cardBg = useColorModeValue('#FFFFFF', '#000000');
-  const cardBorder = useColorModeValue('#808080', '#000000');
-  const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)'); // White shadow for dark theme
+  
+  const cardBg = useColorModeValue('linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)', '#000000');
+  const cardBorder = useColorModeValue('0', '#000000');
+  const cardBorderWidth = useColorModeValue('0px', '1px');
+  const cardShadow = useColorModeValue('sm', '0px 0px 10px rgba(255, 255, 255, 0.2)');
   
   useEffect(() => {
-    // симулируем загрузку данных от ассистента
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 700);
@@ -79,12 +80,12 @@ export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
         {initialLotteries.map((lottery) => (
           <Box
             key={lottery.id}
-            borderWidth="1px"
+            borderWidth={cardBorderWidth}
             borderColor={cardBorder}
             borderRadius="xl"
             p={3}
             bg={cardBg}
-            boxShadow={cardShadow} // Applied here
+            boxShadow={cardShadow}
           >
             <Stack>
               <Heading size="xs">{lottery.name}</Heading>
@@ -114,7 +115,7 @@ export const QuickRecommendations: React.FC<QuickRecommendationsProps> = ({
         <Text fontSize="sm" color={textColor}>
           Если эти варианты не заходят — давай настроим подбор под тебя.
         </Text>
-        <Button bg={buttonBg} color={buttonColor} size="sm" onClick={handleStartQuestionnaire}>
+        <Button bg={buttonBg} color={buttonColor} size="sm" onClick={handleStartQuestionnaire} borderRadius="full"> {/* Made more rounded */}
           Настроить под себя
         </Button>
       </HStack>
