@@ -146,7 +146,7 @@ class StolotoApi {
 
   // /stoloto/draws/ -> proxy -> http://localhost:9090/api/draws/
   getDraws<TResponse>() {
-    return this.client.get<TResponse>('draws/'); // БЕЗ ведущего слэша
+    return this.client.get<TResponse>('draws'); // БЕЗ ведущего слэша
   }
 
   // /stoloto/draw/momental -> proxy -> http://localhost:9090/api/draw/momental

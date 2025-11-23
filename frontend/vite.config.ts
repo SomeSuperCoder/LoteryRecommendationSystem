@@ -29,7 +29,7 @@ export default defineConfig({
         target: 'http://localhost:9090',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/stoloto/, '/api'),
+        rewrite: (path) => path.replace(/^\/stoloto/, ''),
       },
       '/api': {
         target: 'http://localhost:8090',
