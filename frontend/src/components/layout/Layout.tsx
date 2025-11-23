@@ -4,7 +4,6 @@ import Header from '@components/header/Header';
 import Footer from '@components/footer/Footer';
 import AppBackground from '@/components/layout/AppBackground';
 import { LayoutProps } from '@lib';
-import { useColorMode } from '@components/ui/color-mode';
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (

@@ -1,4 +1,4 @@
-import type { StepConfig, Lottery, MicroStep } from '@lib';
+import type { StepConfig, MicroStep } from '@lib';
 import { useColorModeValue } from '@/components/ui/color-mode';
 export const STEPS: StepConfig[] = [
   {

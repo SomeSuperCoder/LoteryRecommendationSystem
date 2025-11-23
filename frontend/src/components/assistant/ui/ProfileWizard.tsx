@@ -83,7 +83,7 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = React.memo(
       any: [],
     });
 
-    const [lastStyleRequested, setLastStyleRequested] = useState<StyleValue | null>(null);
+    const [, setLastStyleRequested] = useState<StyleValue | null>(null);
     const [isLoadingStyle, setIsLoadingStyle] = useState(false);
 
     const currentStep = STEPS[stepIndex];

@@ -5,8 +5,6 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -14,13 +12,11 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* Path Aliases - ВСЁ ЭТО В ОДНОМ compilerOptions */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -34,8 +30,11 @@
       "@pages/*": ["./src/pages/*"],
       "@router": ["./src/router"],
       "@router/*": ["./src/router/*"],
-      "@images": ["./src/lib/assets/images"]
-    }
+      "@images": ["./src/lib/assets/images"],
+      "@images/*": ["./src/lib/assets/images/*"]
+    },
+
+    "types": ["vite/client"]
   },
   "include": ["src"]
 }
