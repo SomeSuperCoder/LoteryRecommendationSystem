@@ -1,6 +1,7 @@
 package recommendations
 
 import (
+	"math"
 	"sort"
 
 	"github.com/SomeSuperCoder/global-chat/models"
@@ -13,17 +14,18 @@ func BestOf(desired *models.UniversalPropsWithK, realValues []models.UniversalPr
 		// Normalize all fields
 		diffed := &models.DiffedUniversalProps{}
 
-		diffed.Frequency = -DiffPercentage(desired.Frequency, real.Frequency) * desired.FrequencyK
+		diffed.Frequency = +DiffPercentage(desired.Frequency, real.Frequency) * desired.FrequencyK
 		diffed.TicketCost = -DiffPercentage(desired.TicketCost, real.TicketCost) * desired.TicketCostK
 		diffed.WinRate = +DiffPercentage(desired.WinRate, real.WinRate) * desired.WinRateK
 		diffed.WinSize = +DiffPercentage(desired.WinSize, real.WinSize) * desired.WinSizeK
 
 		// Diff sum
 		diffSum := diffed.Frequency + diffed.TicketCost + diffed.WinRate + diffed.WinSize
+		absDiffSum := math.Abs(diffSum)
 
 		// Convert into a wrapped type and add into the processed array
 		processed[i] = models.UniversalPropsWithCalcualtedDiffAndName{
-			Diff:           diffSum,
+			Diff:           absDiffSum,
 			Name:           real.Name,
 			UniversalProps: real,
 		}
