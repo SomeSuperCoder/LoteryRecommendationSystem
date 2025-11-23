@@ -32,6 +32,17 @@ export interface UploadProgressEvent {
   progress: number; // 0-100
 }
 
+export interface ImportMetaEnv {
+  readonly VITE_API_URL: string;
+  readonly VITE_STOLOTO_API_URL: string;
+  // сюда же можешь добавить остальные свои переменные:
+  // readonly VITE_SOMETHING_ELSE: string;
+}
+
+export interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 /**
  * Тип для колбэка прогресса
  */
