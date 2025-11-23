@@ -8,10 +8,14 @@ import axios, {
 import { ApiError, UploadProgressCallback } from '@lib';
 import type { BestOfHandlerRequest, BestOfHandlerResponse } from '@lib';
 
+// Базовые URL по умолчанию (через Vite proxy)
+const DEFAULT_API_BASE_URL = '/api';
+const STOLOTO_API_BASE_URL = '/stoloto';
+
 class ApiClient {
   private instance: AxiosInstance;
 
-  constructor(baseURL: string = import.meta.env.VITE_API_URL || '/') {
+  constructor(baseURL: string = DEFAULT_API_BASE_URL) {
     this.instance = axios.create({
       baseURL,
       timeout: 10000,
@@ -137,33 +141,33 @@ class StolotoApi {
 
   constructor() {
     // baseURL относительный, через Vite proxy уйдёт на Go
-    this.client = new ApiClient('/stoloto');
+    this.client = new ApiClient(STOLOTO_API_BASE_URL);
   }
 
-  // /stoloto/draws/ -> proxy -> http://localhost:8080/api/draws/
+  // /stoloto/draws/ -> proxy -> http://localhost:9090/api/draws/
   getDraws<TResponse>() {
     return this.client.get<TResponse>('draws/'); // БЕЗ ведущего слэша
   }
 
-  // /stoloto/momental -> proxy -> http://localhost:8080/api/momental
+  // /stoloto/draw/momental -> proxy -> http://localhost:9090/api/draw/momental
   getMomental<TResponse>() {
     return this.client.get<TResponse>('draw/momental'); // БЕЗ ведущего слэша
   }
 
-  // /stoloto/draw/latest?name=6x45 -> proxy -> http://localhost:8080/api/draw/latest?name=6x45
+  // /stoloto/draw/latest?name=6x45 -> proxy -> http://localhost:9090/api/draw/latest?name=6x45
   getDraw<TResponse>(name: string) {
     return this.client.get<TResponse>('draw/latest', {
       params: { name },
     });
   }
 
-  // /stoloto/draw/latest -> proxy -> http://localhost:8080/api/draw/latest
+  // /stoloto/draw/latest -> proxy -> http://localhost:9090/api/draw/latest
   getLatestDraw<TResponse>() {
     return this.client.get<TResponse>('draw/latest');
   }
 }
 
-export const apiClient = new ApiClient();
+export const apiClient = new ApiClient(DEFAULT_API_BASE_URL);
 export const stolotoApi = new StolotoApi();
 
 export const api = {
@@ -192,13 +196,14 @@ export const api = {
     apiClient.upload<TResponse>(url, formData, onUploadProgress),
 };
 
-// src/lib/api/client.ts
+// =================== RecommendationApi ===================
+
 class RecommendationApi {
   private client: ApiClient;
 
   constructor() {
     // baseURL относительный, через Vite proxy уйдёт на :8090
-    this.client = new ApiClient('/api');
+    this.client = new ApiClient(DEFAULT_API_BASE_URL);
   }
 
   bestOf(payload: BestOfHandlerRequest): Promise<BestOfHandlerResponse> {
