@@ -1,0 +1,17 @@
+services:
+  recommendations_api:
+    build:
+      context: ./backend/
+      dockerfile: ./services/recommendations/Dockerfile
+    image: recommendations_api
+    restart: always
+    ports:
+      - "8090:8090"
+  stoloto_api:
+    build:
+      context: ./backend/
+      dockerfile: ./services/stoloto/Dockerfile
+    image: stoloto_api
+    restart: always
+    ports:
+      - "9090:9090"

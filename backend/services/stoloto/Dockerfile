@@ -6,7 +6,7 @@ COPY go.mod ./
 RUN go mod download
 
 COPY . ./
-RUN go build -o main main.go
+RUN go build -o main ./services/stoloto/main.go
 
 # Final stage
 FROM alpine:3.22
@@ -16,6 +16,6 @@ RUN apk add --no-cache curl
 
 WORKDIR /root
 COPY --from=builder /app/main .
-EXPOSE 8090
+EXPOSE 9090
 
 CMD [ "./main" ]
