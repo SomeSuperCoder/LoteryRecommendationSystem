@@ -12,7 +12,7 @@ func TestBestOf(t *testing.T) {
 		UniversalProps: models.UniversalProps{
 			WinRate:    10,
 			TicketCost: 100,
-			Frequency:  15,
+			Frequency:  20,
 			WinSize:    1000,
 		},
 	}
@@ -21,16 +21,16 @@ func TestBestOf(t *testing.T) {
 
 	real := []models.UniversalProps{
 		{
-			WinRate:    10,
-			TicketCost: 150,
-			Frequency:  15,
-			WinSize:    1000,
+			WinRate:    5,
+			TicketCost: 50,
+			Frequency:  10,
+			WinSize:    500,
 		},
 		{
-			WinRate:    10,
+			WinRate:    15,
 			TicketCost: 150,
-			Frequency:  19,
-			WinSize:    1000,
+			Frequency:  30,
+			WinSize:    1500,
 		},
 	}
 
